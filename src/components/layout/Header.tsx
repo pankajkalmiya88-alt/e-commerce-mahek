@@ -1,0 +1,201 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import Image from "next/image";
+import { ROUTES, CATEGORY_ROUTES } from "@/constants/routes";
+import { cn } from "@/lib/utils/cn";
+import { TypingPlaceholder } from "@/components/ui/TypingPlaceholder";
+
+const SEARCH_PLACEHOLDERS = [
+  "Search Banarasi Sarees...",
+  "Search Sarees...",
+  "Search Lehenga...",
+  "Search Rajputi Poshak...",
+  "Search Bridal Lehenga...",
+];
+
+export const Header = () => {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [placeholderIndex, setPlaceholderIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setPlaceholderIndex((prev) => (prev + 1) % SEARCH_PLACEHOLDERS.length);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <header className="bg-white border-b border-border-light relative z-49">
+      <div className="container-fluid">
+        <div className="flex items-center justify-between min-h-[60px] py-2">
+          <div className="flex items-center gap-4">
+            <button
+              className="lg:hidden text-text-primary"
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              aria-label="Toggle menu"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+
+            <Link href={ROUTES.HOME} className="flex items-center">
+              <Image
+                src="/images/mahek_sarees_logo.svg"
+                alt="Mahek Sarees"
+                width={60}
+                height={60}
+                className="w-12 h-12 md:w-14 md:h-14"
+              />
+            </Link>
+          </div>
+
+          <nav className="hidden lg:flex items-center gap-7">
+            <Link
+              href={ROUTES.HOME}
+              className="text-sm font-inter text-text-primary hover:text-primary transition-colors font-medium"
+            >
+              Home
+            </Link>
+            <div className="relative group">
+              <button className="text-sm font-inter text-text-primary hover:text-primary transition-colors flex items-center gap-1 font-medium">
+                Shop
+                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              <div className="absolute top-full left-0 mt-2 bg-white shadow-lg py-2 min-w-[200px] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 rounded-sm z-51">
+                <Link href={CATEGORY_ROUTES.SAREES} className="block px-4 py-2 text-sm hover:bg-background-gray transition-colors">
+                  Sarees
+                </Link>
+                <Link href={CATEGORY_ROUTES.BANARASI_SAREES} className="block px-4 py-2 text-sm hover:bg-background-gray transition-colors">
+                  Banarasi Sarees
+                </Link>
+                <Link href={CATEGORY_ROUTES.LEHENGA} className="block px-4 py-2 text-sm hover:bg-background-gray transition-colors">
+                  Lehanga
+                </Link>
+                <Link href={CATEGORY_ROUTES.RAJPUTI_POSHAK} className="block px-4 py-2 text-sm hover:bg-background-gray transition-colors">
+                  Rajputi Poshak
+                </Link>
+                <Link href={CATEGORY_ROUTES.BRIDAL_LEHENGA} className="block px-4 py-2 text-sm hover:bg-background-gray transition-colors">
+                  Bridal Lehanga
+                </Link>
+              </div>
+            </div>
+            <Link
+              href={ROUTES.PRODUCTS}
+              className="text-sm font-inter text-text-primary hover:text-primary transition-colors font-medium"
+            >
+              Products
+            </Link>
+            <Link
+              href={ROUTES.SALE}
+              className="text-sm font-inter text-text-primary hover:text-primary transition-colors font-medium"
+            >
+              Sale
+            </Link>
+            <Link
+              href={ROUTES.TRENDING}
+              className="text-sm font-inter text-text-primary hover:text-primary transition-colors font-medium"
+            >
+              Trending Collection
+            </Link>
+            <Link
+              href={ROUTES.TRACK_ORDER}
+              className="text-sm font-inter text-text-primary hover:text-primary transition-colors font-medium"
+            >
+              Track Order
+            </Link>
+          </nav>
+
+          <div className="flex items-center gap-3">
+            <button
+              className="text-text-primary hover:text-primary transition-colors"
+              onClick={() => setIsSearchOpen(!isSearchOpen)}
+              aria-label="Search"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </button>
+
+            <Link
+              href={ROUTES.WISHLIST}
+              className="relative text-text-primary hover:text-primary transition-colors"
+              aria-label="Wishlist"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+              </svg>
+              <span className="absolute -top-1.5 -right-1.5 bg-primary text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full font-medium">
+                0
+              </span>
+            </Link>
+
+            <button className="text-text-primary hover:text-primary transition-colors" aria-label="Account">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+            </button>
+
+            <Link
+              href={ROUTES.CART}
+              className="relative text-text-primary hover:text-primary transition-colors"
+              aria-label="Cart"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+              </svg>
+              <span className="absolute -top-1.5 -right-1.5 bg-primary text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full font-medium">
+                2
+              </span>
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      {isSearchOpen && (
+        <div className="absolute top-full left-0 right-0 bg-white shadow-2xl p-4 md:p-8 z-40 border-t border-border-light">
+          <div className="container-fluid">
+            <button
+              className="absolute top-3 right-3 md:top-6 md:right-6 text-text-secondary hover:text-primary transition-colors z-10"
+              onClick={() => setIsSearchOpen(false)}
+              aria-label="Close search"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+            <form className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-0 max-w-2xl mx-auto w-full pr-10 md:pr-0">
+              <div className="flex-1 relative">
+                <svg className="absolute left-3 md:left-4 top-1/2 -translate-y-1/2 w-4 h-4 md:w-5 md:h-5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+                <input
+                  type="text"
+                  placeholder=""
+                  className="w-full pl-10 md:pl-12 pr-4 py-3 md:py-3.5 border border-gray-300 rounded-lg sm:rounded-l-lg sm:rounded-r-none focus:outline-none focus:ring-1 focus:ring-inset focus:ring-black focus:border-black text-sm font-poppins bg-white hover:bg-white transition-colors"
+                  style={{
+                    backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1' height='1'%3E%3Crect fill='white' width='1' height='1'/%3E%3C/svg%3E")`,
+                  }}
+                />
+                <div className="absolute left-10 md:left-12 top-1/2 -translate-y-1/2 text-gray-400 text-xs md:text-sm font-poppins pointer-events-none">
+                  <TypingPlaceholder texts={SEARCH_PLACEHOLDERS} interval={3000} typingSpeed={50} />
+                </div>
+              </div>
+              <button
+                type="submit"
+                className="flex-shrink-0 px-6 md:px-8 py-3 md:py-3.5 bg-black text-white rounded-lg sm:rounded-l-none sm:rounded-r-lg hover:bg-gray-900 transition-all duration-300 text-sm font-semibold font-poppins shadow-md hover:shadow-lg border border-black"
+              >
+                Search
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+    </header>
+  );
+};

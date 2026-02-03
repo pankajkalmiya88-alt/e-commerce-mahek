@@ -14,6 +14,12 @@ interface ProductDetailPageProps {
   }>;
 }
 
+export async function generateStaticParams() {
+  return MOCK_PRODUCTS.map((product) => ({
+    slug: product.slug,
+  }));
+}
+
 export async function generateMetadata({ params }: ProductDetailPageProps): Promise<Metadata> {
   const { slug } = await params;
   const product = MOCK_PRODUCTS.find((p) => p.slug === slug);

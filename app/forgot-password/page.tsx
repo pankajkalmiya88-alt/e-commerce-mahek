@@ -48,6 +48,13 @@ export default function ForgotPasswordPage() {
     }
   };
 
+  const isFormValid = () => {
+    return (
+      formData.email.trim() !== "" &&
+      /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)
+    );
+  };
+
   if (isSuccess) {
     return (
       <AuthContainer
@@ -155,7 +162,12 @@ export default function ForgotPasswordPage() {
           autoComplete="email"
         />
 
-        <AuthButton className="bg-[#7d1f3e]" type="submit" isLoading={isLoading}>
+        <AuthButton 
+          className="bg-[#7d1f3e]" 
+          type="submit" 
+          isLoading={isLoading}
+          disabled={!isFormValid() || isLoading}
+        >
           Send Reset Link
         </AuthButton>
 

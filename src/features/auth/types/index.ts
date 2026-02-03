@@ -23,3 +23,24 @@ export interface ValidationError {
 export interface FormErrors {
   [key: string]: string;
 }
+
+export interface SendOtpRequest {
+  email: string;
+  name: string;
+}
+
+export interface SendOtpResponse {
+  success: boolean;
+  message: string;
+}
+
+export interface VerifyOtpRequest {
+  email: string;
+  otp: string;
+}
+
+export interface VerifyOtpResponse {
+  success: boolean;
+  message: string;
+  token?: string;
+}

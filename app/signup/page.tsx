@@ -6,8 +6,13 @@ import { AuthContainer } from "@/features/auth/components/AuthContainer";
 import { FormInput } from "@/features/auth/components/FormInput";
 import { PasswordInput } from "@/features/auth/components/PasswordInput";
 import { AuthButton } from "@/features/auth/components/AuthButton";
-import { validateSignupForm } from "@/features/auth/utils/validation";
+import { OtpInput } from "@/features/auth/components/OtpInput";
+import { validateSignupForm, validateOtp } from "@/features/auth/utils/validation";
+import { authService } from "@/features/auth/services/auth.service";
+import { AUTH_MESSAGES } from "@/features/auth/constants";
 import type { SignupFormData, FormErrors } from "@/features/auth/types";
+
+type SignupStep = "form" | "otp";
 
 export default function SignupPage() {
   const [formData, setFormData] = useState<SignupFormData>({
@@ -19,6 +24,11 @@ export default function SignupPage() {
   });
   const [errors, setErrors] = useState<FormErrors>({});
   const [isLoading, setIsLoading] = useState(false);
+  const [currentStep, setCurrentStep] = useState<SignupStep>("form");
+  const [otp, setOtp] = useState("");
+  const [otpError, setOtpError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -30,6 +40,8 @@ export default function SignupPage() {
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setErrorMessage("");
+    setSuccessMessage("");
 
     const validationErrors = validateSignupForm(formData);
 
@@ -41,20 +53,169 @@ export default function SignupPage() {
     setIsLoading(true);
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      console.log("Signup data:", formData);
+      await authService.sendOtp({
+        email: formData.email,
+        name: formData.fullName,
+      });
+      
+      setSuccessMessage(AUTH_MESSAGES.OTP_SENT);
+      setCurrentStep("otp");
     } catch (error) {
-      console.error("Signup error:", error);
+      const errorMsg = error instanceof Error ? error.message : "Failed to send OTP";
+      setErrorMessage(errorMsg);
     } finally {
       setIsLoading(false);
     }
   };
+
+  const handleVerifyOtp = async () => {
+    setOtpError("");
+    setErrorMessage("");
+    setSuccessMessage("");
+
+    const otpValidationError = validateOtp(otp);
+    if (otpValidationError) {
+      setOtpError(otpValidationError);
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      await authService.verifyOtp({
+        email: formData.email,
+        otp: otp,
+      });
+      
+      setSuccessMessage(AUTH_MESSAGES.SIGNUP_SUCCESS);
+      
+      setTimeout(() => {
+        window.location.href = "/login";
+      }, 1500);
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : "Failed to verify OTP";
+      setErrorMessage(errorMsg);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleResendOtp = async () => {
+    setErrorMessage("");
+    setSuccessMessage("");
+    setOtpError("");
+    setOtp("");
+    setIsLoading(true);
+
+    try {
+      await authService.sendOtp({
+        email: formData.email,
+        name: formData.fullName,
+      });
+      
+      setSuccessMessage(AUTH_MESSAGES.OTP_SENT);
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : "Failed to resend OTP";
+      setErrorMessage(errorMsg);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleBackToForm = () => {
+    setCurrentStep("form");
+    setOtp("");
+    setOtpError("");
+    setErrorMessage("");
+    setSuccessMessage("");
+  };
+
+  const isFormValid = () => {
+    const { fullName, email, phone, password, confirmPassword } = formData;
+    return (
+      fullName.trim().length >= 2 &&
+      email.trim() !== "" &&
+      /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) &&
+      phone.trim() !== "" &&
+      /^[6-9]\d{9}$/.test(phone) &&
+      password.length >= 8 &&
+      confirmPassword !== "" &&
+      password === confirmPassword
+    );
+  };
+
+  if (currentStep === "otp") {
+    return (
+      <AuthContainer
+        title="Verify OTP"
+        subtitle={`Enter the 6-digit code sent to ${formData.email}`}
+      >
+        <div className="space-y-6">
+          {successMessage && (
+            <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+              <p className="text-sm font-poppins text-green-800">{successMessage}</p>
+            </div>
+          )}
+          
+          {errorMessage && (
+            <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+              <p className="text-sm font-poppins text-red-800">{errorMessage}</p>
+            </div>
+          )}
+
+          <OtpInput
+            value={otp}
+            onChange={(value) => {
+              setOtp(value);
+              if (otpError) setOtpError("");
+            }}
+            error={otpError}
+            disabled={isLoading}
+          />
+
+          <AuthButton
+            className="bg-[#7d1f3e]"
+            type="button"
+            onClick={handleVerifyOtp}
+            isLoading={isLoading}
+          >
+            Verify OTP
+          </AuthButton>
+
+          <div className="flex items-center justify-between text-sm">
+            <button
+              type="button"
+              onClick={handleBackToForm}
+              className="font-poppins text-text-secondary hover:text-secondary transition-colors underline-offset-2 hover:underline"
+              disabled={isLoading}
+            >
+              ← Back to form
+            </button>
+            <button
+              type="button"
+              onClick={handleResendOtp}
+              className="font-poppins font-semibold text-secondary hover:text-secondary-dark transition-colors underline-offset-2 hover:underline"
+              disabled={isLoading}
+            >
+              Resend OTP
+            </button>
+          </div>
+        </div>
+      </AuthContainer>
+    );
+  }
 
   return (
     <AuthContainer
       title="Create Account"
       subtitle="Join us and start your journey"
     >
+      {errorMessage && (
+        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+          <p className="text-sm font-poppins text-red-800">{errorMessage}</p>
+        </div>
+      )}
+      
       <form onSubmit={handleSubmit} className="space-y-6">
         <FormInput
           label="Full Name"
@@ -110,8 +271,13 @@ export default function SignupPage() {
           autoComplete="new-password"
         />
 
-        <AuthButton className="bg-[#7d1f3e]" type="submit" isLoading={isLoading}>
-          Create Account
+        <AuthButton 
+          className="bg-[#7d1f3e]" 
+          type="submit" 
+          isLoading={isLoading}
+          disabled={!isFormValid() || isLoading}
+        >
+          Send OTP
         </AuthButton>
 
         <div className="relative my-8">

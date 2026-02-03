@@ -3,6 +3,7 @@ import {
   VALIDATION_PATTERNS,
   PASSWORD_MIN_LENGTH,
   FULL_NAME_MIN_LENGTH,
+  OTP_LENGTH,
 } from "../constants";
 import type {
   LoginFormData,
@@ -66,7 +67,7 @@ export const validateSignupForm = (data: SignupFormData): FormErrors => {
 };
 
 export const validateForgotPasswordForm = (
-  data: ForgotPasswordFormData
+  data: ForgotPasswordFormData,
 ): FormErrors => {
   const errors: FormErrors = {};
 
@@ -77,4 +78,16 @@ export const validateForgotPasswordForm = (
   }
 
   return errors;
+};
+
+export const validateOtp = (otp: string): string | undefined => {
+  if (!otp || otp.trim() === "") {
+    return AUTH_MESSAGES.OTP_REQUIRED;
+  }
+
+  if (otp.length !== OTP_LENGTH || !/^\d{6}$/.test(otp)) {
+    return AUTH_MESSAGES.INVALID_OTP;
+  }
+
+  return undefined;
 };

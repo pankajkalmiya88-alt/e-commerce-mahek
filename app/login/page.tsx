@@ -47,6 +47,15 @@ export default function LoginPage() {
     }
   };
 
+  const isFormValid = () => {
+    const { emailOrPhone, password } = formData;
+    return (
+      emailOrPhone.trim() !== "" &&
+      /^([^\s@]+@[^\s@]+\.[^\s@]+|[6-9]\d{9})$/.test(emailOrPhone) &&
+      password.length >= 8
+    );
+  };
+
   return (
     <AuthContainer
       title="Welcome Back"
@@ -83,7 +92,12 @@ export default function LoginPage() {
           </Link>
         </div>
 
-        <AuthButton className="bg-[#7d1f3e]" type="submit" isLoading={isLoading}>
+        <AuthButton 
+          className="bg-[#7d1f3e]" 
+          type="submit" 
+          isLoading={isLoading}
+          disabled={!isFormValid() || isLoading}
+        >
           Login
         </AuthButton>
 

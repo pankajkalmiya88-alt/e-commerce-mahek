@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { playfair, inter } from "@/lib/fonts";
+import { playfair, inter, poppins } from "@/lib/fonts";
 import { generateSEO } from "@/lib/utils/seo";
 import { TopBar } from "@/components/layout/TopBar";
 import { Header } from "@/components/layout/Header";
@@ -14,7 +14,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${playfair.variable} ${inter.variable}`}>
+    <html lang="en" className={`${playfair.variable} ${inter.variable} ${poppins.variable}`}>
       <body className="min-h-screen flex flex-col">
         <TopBar />
         <Header />

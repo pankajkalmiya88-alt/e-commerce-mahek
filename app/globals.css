@@ -1,5 +1,48 @@
 @import "tailwindcss";
 
+@theme {
+  --color-primary: #222222;
+  --color-primary-dark: #5F0D24;
+  --color-primary-light: #444444;
+  --color-secondary: #5F0D24;
+  --color-secondary-dark: #786622;
+  --color-accent: #f06543;
+  --color-accent-hover: #e05533;
+  --color-background: #ffffff;
+  --color-background-gray: #f5f5f5;
+  --color-background-light: #fafafa;
+  --color-text-primary: #222222;
+  --color-text-secondary: #666666;
+  --color-text-muted: #777777;
+  --color-text-light: #999999;
+  --color-border: #e8e9eb;
+  --color-border-dark: #d7d7d7;
+  --color-border-light: #eeeeee;
+  --color-sale: #f00000;
+  --color-sale-bg: #fff0ef;
+  --color-success: #198754;
+  --color-error: #dc3545;
+  --color-warning: #ffc107;
+
+  --font-family-playfair: var(--font-playfair), serif;
+  --font-family-inter: var(--font-inter), sans-serif;
+  --font-family-poppins: var(--font-poppins), sans-serif;
+
+  --spacing-18: 4.5rem;
+  --spacing-22: 5.5rem;
+  --spacing-26: 6.5rem;
+
+  --border-radius: 6px;
+  --border-radius-sm: 3px;
+  --border-radius-md: 6px;
+  --border-radius-lg: 8px;
+
+  --shadow-sm: 0 0 4px rgba(0,0,0,0.1);
+  --shadow: 0 0 15px rgba(5,0,0,0.1);
+  --shadow-md: 0 0 15px rgba(5,0,0,0.15);
+  --shadow-lg: 0 0 6px rgba(0,0,0,0.2);
+}
+
 * {
   box-sizing: border-box;
 }

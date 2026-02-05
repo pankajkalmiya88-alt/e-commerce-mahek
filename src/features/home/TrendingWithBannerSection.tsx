@@ -32,8 +32,8 @@ export const TrendingWithBannerSection = ({ bannerPosition = 'right', title = 'T
           <div className="lg:col-span-3">
             <div className="flex items-center justify-between mb-4 md:mb-6">
               <h2 className="text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 font-playfair tracking-tight">{title}</h2>
-              <Link href={ROUTES.TRENDING} className="text-xs md:text-sm font-medium text-gray-700 hover:text-black transition-colors font-poppins whitespace-nowrap">
-                View All
+              <Link href={ROUTES.PRODUCTS} className="text-xs md:text-sm font-semibold text-primary hover:text-primary/80 transition-colors font-poppins whitespace-nowrap">
+                View All →
               </Link>
             </div>
 

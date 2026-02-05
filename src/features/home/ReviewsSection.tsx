@@ -58,7 +58,7 @@ export const ReviewsSection = () => {
 
           <div className="overflow-hidden">
             <div
-              className="flex gap-4 md:gap-6 transition-all duration-500"
+              className="flex gap-4 md:gap-6 transition-all duration-500 py-4"
               style={{ transform: `translateX(-${reviewIndex * 33.33}%)` }}
             >
               {MOCK_REVIEWS.map((review) => (

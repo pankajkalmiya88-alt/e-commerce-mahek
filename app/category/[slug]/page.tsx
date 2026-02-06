@@ -11,6 +11,12 @@ interface CategoryPageProps {
   }>;
 }
 
+export function generateStaticParams() {
+  return CATEGORIES.map((category) => ({
+    slug: category.slug,
+  }));
+}
+
 export async function generateMetadata({
   params,
 }: CategoryPageProps): Promise<Metadata> {

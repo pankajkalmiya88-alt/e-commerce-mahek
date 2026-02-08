@@ -43,4 +43,27 @@ export interface VerifyOtpResponse {
   success: boolean;
   message: string;
   token?: string;
+  user?: UserData;
+}
+
+export interface UserData {
+  id: string;
+  email: string;
+  name: string;
+  role: string;
+  addresses: Address[];
+}
+
+export interface Address {
+  id?: string;
+  street?: string;
+  city?: string;
+  state?: string;
+  zipCode?: string;
+  country?: string;
+}
+
+export interface AuthFormData {
+  email: string;
+  agreeToTerms: boolean;
 }

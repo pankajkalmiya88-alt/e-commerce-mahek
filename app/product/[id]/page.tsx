@@ -1,45 +1,54 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { MOCK_PRODUCTS } from "@/data/mock-products";
 import { ProductImageGallery } from "@/components/product/ProductImageGallery";
 import { ROUTES } from "@/constants/routes";
 import { generateSEO } from "@/lib/utils/seo";
 import { ProductDetailClient } from "./ProductDetailClient";
 import { ProductTabs } from "./ProductTabs";
+import { productService } from "@/features/products/services/product.service";
+import { adaptAPIProductToUI } from "@/features/products/utils/product-adapter";
 
 interface ProductDetailPageProps {
   params: Promise<{
-    slug: string;
+    id: string;
   }>;
 }
 
 export async function generateStaticParams() {
-  return MOCK_PRODUCTS.map((product) => ({
-    slug: product.slug,
-  }));
+  return [];
 }
 
 export async function generateMetadata({ params }: ProductDetailPageProps): Promise<Metadata> {
-  const { slug } = await params;
-  const product = MOCK_PRODUCTS.find((p) => p.slug === slug);
+  const { id } = await params;
+  
+  try {
+    const apiProduct = await productService.getProductById(id);
+    const product = adaptAPIProductToUI(apiProduct);
 
-  if (!product) {
+    return generateSEO({
+      title: `${product.name} - Mahek Sarees`,
+      description: product.description || "",
+    });
+  } catch (error) {
     return generateSEO({
       title: "Product Not Found",
       description: "The product you are looking for does not exist.",
     });
   }
-
-  return generateSEO({
-    title: `${product.name} - Mahek Sarees`,
-    description: product.shortDescription || product.description || "",
-  });
 }
 
 export default async function ProductDetailPage({ params }: ProductDetailPageProps) {
-  const { slug } = await params;
-  const product = MOCK_PRODUCTS.find((p) => p.slug === slug);
+  const { id } = await params;
+  
+  let apiProduct;
+  try {
+    apiProduct = await productService.getProductById(id);
+  } catch (error) {
+    notFound();
+  }
+
+  const product = adaptAPIProductToUI(apiProduct);
 
   if (!product) {
     notFound();

@@ -10,6 +10,7 @@ import type {
   SignupFormData,
   ForgotPasswordFormData,
   FormErrors,
+  AuthFormData,
 } from "../types";
 
 export const validateLoginForm = (data: LoginFormData): FormErrors => {
@@ -90,4 +91,21 @@ export const validateOtp = (otp: string): string | undefined => {
   }
 
   return undefined;
+};
+
+export const validateAuthForm = (data: AuthFormData): FormErrors => {
+  const errors: FormErrors = {};
+
+  if (!data.email.trim()) {
+    errors.email = AUTH_MESSAGES.REQUIRED_FIELD;
+  } else if (!VALIDATION_PATTERNS.EMAIL.test(data.email)) {
+    errors.email = AUTH_MESSAGES.INVALID_EMAIL;
+  }
+
+  if (!data.agreeToTerms) {
+    errors.agreeToTerms =
+      "You must agree to the Terms of Use and Privacy Policy";
+  }
+
+  return errors;
 };

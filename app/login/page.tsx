@@ -1,34 +1,62 @@
 "use client";
 
-import { useState, FormEvent } from "react";
+import { useState, FormEvent, useEffect } from "react";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import { AuthContainer } from "@/features/auth/components/AuthContainer";
 import { FormInput } from "@/features/auth/components/FormInput";
-import { PasswordInput } from "@/features/auth/components/PasswordInput";
 import { AuthButton } from "@/features/auth/components/AuthButton";
-import { validateLoginForm } from "@/features/auth/utils/validation";
-import type { LoginFormData, FormErrors } from "@/features/auth/types";
+import { OtpInput } from "@/features/auth/components/OtpInput";
+import { validateAuthForm, validateOtp } from "@/features/auth/utils/validation";
+import { authService } from "@/features/auth/services/auth.service";
+import { AUTH_MESSAGES } from "@/features/auth/constants";
+import { getRedirectUrl } from "@/lib/auth-utils";
+import type { AuthFormData, FormErrors } from "@/features/auth/types";
+
+type AuthStep = "email" | "otp";
 
 export default function LoginPage() {
-  const [formData, setFormData] = useState<LoginFormData>({
-    emailOrPhone: "",
-    password: "",
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [formData, setFormData] = useState<AuthFormData>({
+    email: "",
+    agreeToTerms: false,
   });
   const [errors, setErrors] = useState<FormErrors>({});
   const [isLoading, setIsLoading] = useState(false);
+  const [currentStep, setCurrentStep] = useState<AuthStep>("email");
+  const [otp, setOtp] = useState("");
+  const [otpError, setOtpError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+
+  useEffect(() => {
+    const token = typeof window !== "undefined" ? localStorage.getItem("authToken") : null;
+    const userData = typeof window !== "undefined" ? localStorage.getItem("userData") : null;
+    
+    if (token && userData) {
+      const redirectUrl = getRedirectUrl(searchParams);
+      router.replace(redirectUrl);
+    }
+  }, [router, searchParams]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    const { name, value, type, checked } = e.target;
+    const fieldValue = type === "checkbox" ? checked : value;
+    
+    setFormData((prev) => ({ ...prev, [name]: fieldValue }));
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: "" }));
     }
+    setErrorMessage("");
   };
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setErrorMessage("");
+    setSuccessMessage("");
 
-    const validationErrors = validateLoginForm(formData);
+    const validationErrors = validateAuthForm(formData);
 
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
@@ -38,90 +66,224 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      console.log("Login data:", formData);
+      await authService.sendOtp({
+        email: formData.email,
+        name: "",
+      });
+      
+      setSuccessMessage(AUTH_MESSAGES.OTP_SENT);
+      setCurrentStep("otp");
     } catch (error) {
-      console.error("Login error:", error);
+      const errorMsg = error instanceof Error ? error.message : "Failed to send OTP";
+      setErrorMessage(errorMsg);
     } finally {
       setIsLoading(false);
     }
   };
 
+  const handleVerifyOtp = async () => {
+    setOtpError("");
+    setErrorMessage("");
+    setSuccessMessage("");
+
+    const otpValidationError = validateOtp(otp);
+    if (otpValidationError) {
+      setOtpError(otpValidationError);
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const result = await authService.verifyOtp({
+        email: formData.email,
+        otp: otp,
+      });
+      
+      setSuccessMessage(AUTH_MESSAGES.OTP_VERIFIED);
+      
+      const redirectUrl = getRedirectUrl(searchParams);
+      
+      setTimeout(() => {
+        router.push(redirectUrl);
+      }, 1500);
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : "Failed to verify OTP";
+      setErrorMessage(errorMsg);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleResendOtp = async () => {
+    setErrorMessage("");
+    setSuccessMessage("");
+    setOtpError("");
+    setOtp("");
+    setIsLoading(true);
+
+    try {
+      await authService.sendOtp({
+        email: formData.email,
+        name: "",
+      });
+      
+      setSuccessMessage(AUTH_MESSAGES.OTP_SENT);
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : "Failed to resend OTP";
+      setErrorMessage(errorMsg);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleBackToEmail = () => {
+    setCurrentStep("email");
+    setOtp("");
+    setOtpError("");
+    setErrorMessage("");
+    setSuccessMessage("");
+  };
+
   const isFormValid = () => {
-    const { emailOrPhone, password } = formData;
     return (
-      emailOrPhone.trim() !== "" &&
-      /^([^\s@]+@[^\s@]+\.[^\s@]+|[6-9]\d{9})$/.test(emailOrPhone) &&
-      password.length >= 8
+      formData.email.trim() !== "" &&
+      /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email) &&
+      formData.agreeToTerms
     );
   };
 
   return (
     <AuthContainer
-      title="Welcome Back"
-      subtitle="Login to your account to continue"
+      title="Login or Signup"
+      subtitle=""
     >
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <FormInput
-          label="Email or Phone"
-          name="emailOrPhone"
-          type="text"
-          value={formData.emailOrPhone}
-          onChange={handleChange}
-          error={errors.emailOrPhone}
-          placeholder="Enter your email or phone number"
-          autoComplete="username"
-        />
+      {currentStep === "email" ? (
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <FormInput
+            label=""
+            name="email"
+            type="email"
+            value={formData.email}
+            onChange={handleChange}
+            error={errors.email}
+            placeholder="Email Address*"
+            autoComplete="email"
+          />
 
-        <PasswordInput
-          label="Password"
-          name="password"
-          value={formData.password}
-          onChange={handleChange}
-          error={errors.password}
-          placeholder="Enter your password"
-          autoComplete="current-password"
-        />
+          <div className="flex items-start gap-3">
+            <input
+              type="checkbox"
+              id="agreeToTerms"
+              name="agreeToTerms"
+              checked={formData.agreeToTerms}
+              onChange={handleChange}
+              className="mt-1 w-4 h-4 rounded border-border text-secondary focus:ring-secondary focus:ring-2"
+            />
+            <label htmlFor="agreeToTerms" className="text-sm font-poppins text-text-secondary leading-relaxed">
+              By continuing, I agree to the{" "}
+              <Link href="/terms" className="text-secondary font-semibold hover:underline">
+                Terms of Use
+              </Link>{" "}
+              &{" "}
+              <Link href="/privacy" className="text-secondary font-semibold hover:underline">
+                Privacy Policy
+              </Link>{" "}
+              and I am above 18 years old.
+            </label>
+          </div>
+          {errors.agreeToTerms && (
+            <p className="text-sm font-poppins text-red-600 -mt-2">{errors.agreeToTerms}</p>
+          )}
 
-        <div className="flex items-center justify-end">
-          <Link
-            href="/forgot-password"
-            className="text-sm font-inter font-medium text-secondary hover:text-secondary-dark transition-colors underline-offset-2 hover:underline"
+          {errorMessage && (
+            <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+              <p className="text-sm font-poppins text-red-600">{errorMessage}</p>
+            </div>
+          )}
+
+          {successMessage && (
+            <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+              <p className="text-sm font-poppins text-green-600">{successMessage}</p>
+            </div>
+          )}
+
+          <AuthButton 
+            type="submit" 
+            isLoading={isLoading}
+            disabled={!isFormValid() || isLoading}
           >
-            Forgot Password?
-          </Link>
-        </div>
+            CONTINUE
+          </AuthButton>
 
-        <AuthButton 
-          className="bg-[#7d1f3e]" 
-          type="submit" 
-          isLoading={isLoading}
-          disabled={!isFormValid() || isLoading}
-        >
-          Login
-        </AuthButton>
-
-        <div className="relative my-8">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-border"></div>
+          <div className="text-center">
+            <p className="text-sm font-poppins text-text-secondary">
+              Have trouble logging in?{" "}
+              <Link
+                href="/help"
+                className="text-secondary font-semibold hover:underline"
+              >
+                Get help
+              </Link>
+            </p>
           </div>
-          <div className="relative flex justify-center text-sm">
-            <span className="px-4 bg-white text-text-secondary font-inter">or</span>
+        </form>
+      ) : (
+        <div className="space-y-6">
+          <div className="text-center">
+            <p className="text-sm font-poppins text-text-secondary mb-6">
+              We&apos;ve sent a 6-digit OTP to <span className="font-semibold text-text-primary">{formData.email}</span>
+            </p>
           </div>
-        </div>
 
-        <div className="text-center">
-          <p className="text-sm font-inter text-text-secondary">
-            Don&apos;t have an account?{" "}
-            <Link
-              href="/signup"
-              className="text-secondary font-semibold hover:text-secondary-dark transition-colors underline-offset-2 hover:underline"
+          <OtpInput
+            value={otp}
+            onChange={setOtp}
+            error={otpError}
+            disabled={isLoading}
+          />
+
+          {errorMessage && (
+            <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+              <p className="text-sm font-poppins text-red-600">{errorMessage}</p>
+            </div>
+          )}
+
+          {successMessage && (
+            <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+              <p className="text-sm font-poppins text-green-600">{successMessage}</p>
+            </div>
+          )}
+
+          <AuthButton 
+            type="button"
+            onClick={handleVerifyOtp}
+            isLoading={isLoading}
+            disabled={otp.length !== 6 || isLoading}
+          >
+            VERIFY OTP
+          </AuthButton>
+
+          <div className="flex items-center justify-between text-sm font-poppins">
+            <button
+              type="button"
+              onClick={handleBackToEmail}
+              className="text-secondary font-semibold hover:underline"
+              disabled={isLoading}
             >
-              Sign Up
-            </Link>
-          </p>
+              Change Email
+            </button>
+            <button
+              type="button"
+              onClick={handleResendOtp}
+              className="text-secondary font-semibold hover:underline"
+              disabled={isLoading}
+            >
+              Resend OTP
+            </button>
+          </div>
         </div>
-      </form>
+      )}
     </AuthContainer>
   );
 }

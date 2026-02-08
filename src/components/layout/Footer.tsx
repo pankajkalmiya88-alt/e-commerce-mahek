@@ -79,7 +79,7 @@ export const Footer = () => {
               </li>
               <li>
                 <Link
-                  href={ROUTES.PRODUCTS}
+                  href={ROUTES.SHOP}
                   className="text-xs md:text-sm text-gray-600 hover:text-accent transition-colors leading-relaxed"
                 >
                   All Products

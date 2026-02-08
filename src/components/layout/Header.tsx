@@ -6,6 +6,8 @@ import Image from "next/image";
 import { ROUTES, CATEGORY_ROUTES } from "@/constants/routes";
 import { cn } from "@/lib/utils/cn";
 import { TypingPlaceholder } from "@/components/ui/TypingPlaceholder";
+import { ProfileDropdown } from "@/components/layout/ProfileDropdown";
+import { isAuthenticated } from "@/lib/auth-utils";
 
 const SEARCH_PLACEHOLDERS = [
   "Search Banarasi Sarees...",
@@ -19,6 +21,26 @@ export const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [placeholderIndex, setPlaceholderIndex] = useState(0);
+  const [isAuth, setIsAuth] = useState(false);
+
+  useEffect(() => {
+    setIsAuth(isAuthenticated());
+
+    const handleStorageChange = () => {
+      setIsAuth(isAuthenticated());
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    
+    const interval = setInterval(() => {
+      setIsAuth(isAuthenticated());
+    }, 1000);
+
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+      clearInterval(interval);
+    };
+  }, []);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -86,7 +108,7 @@ export const Header = () => {
               </div>
             </div>
             <Link
-              href={ROUTES.PRODUCTS}
+              href={ROUTES.SHOP}
               className="text-sm font-inter text-text-primary hover:text-primary transition-colors font-medium"
             >
               Products
@@ -135,15 +157,19 @@ export const Header = () => {
               </span>
             </Link>
 
-            <Link
-              href={ROUTES.LOGIN}
-              className="text-text-primary hover:text-primary transition-colors"
-              aria-label="Account"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-              </svg>
-            </Link>
+            {isAuth ? (
+              <ProfileDropdown />
+            ) : (
+              <Link
+                href={ROUTES.LOGIN}
+                className="text-text-primary hover:text-primary transition-colors"
+                aria-label="Account"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+              </Link>
+            )}
 
             <Link
               href={ROUTES.CART}

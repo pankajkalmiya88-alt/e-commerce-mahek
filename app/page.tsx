@@ -17,9 +17,9 @@ export default function Home() {
       <CategorySection />
       <MarqueeBar />
       <BestSellingSection />
-      <TrendingWithBannerSection bannerPosition="right" title="Top Trending Collection 1" />
+      <TrendingWithBannerSection bannerPosition="right" title="Top Trending Collection" />
       <FlashSaleSection />
-      <TrendingWithBannerSection bannerPosition="left" title="Top Trending Collection 2" />
+      <TrendingWithBannerSection bannerPosition="left" title="Lehenga" />
       <PremiumRetailsSection />
       <GallerySection />
       <ReviewsSection />

@@ -11,7 +11,7 @@ interface TrendingWithBannerSectionProps {
   title?: string;
 }
 
-export const TrendingWithBannerSection = ({ bannerPosition = 'right', title = 'Top Trending Collection 1' }: TrendingWithBannerSectionProps) => {
+export const TrendingWithBannerSection = ({ bannerPosition = 'right', title = 'Top Trending Collection' }: TrendingWithBannerSectionProps) => {
   const trendingProducts = MOCK_PRODUCTS.filter((product) => product.trending).slice(0, 4);
 
   return (
@@ -32,7 +32,7 @@ export const TrendingWithBannerSection = ({ bannerPosition = 'right', title = 'T
           <div className="lg:col-span-3">
             <div className="flex items-center justify-between mb-4 md:mb-6">
               <h2 className="text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 font-playfair tracking-tight">{title}</h2>
-              <Link href={ROUTES.PRODUCTS} className="text-xs md:text-sm font-semibold text-primary hover:text-primary/80 transition-colors font-poppins whitespace-nowrap">
+              <Link href={ROUTES.SHOP} className="text-xs md:text-sm font-semibold text-primary hover:text-primary/80 transition-colors font-poppins whitespace-nowrap">
                 View All →
               </Link>
             </div>

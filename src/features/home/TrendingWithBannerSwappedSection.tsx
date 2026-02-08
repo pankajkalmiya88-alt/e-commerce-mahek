@@ -15,7 +15,7 @@ export const TrendingWithBannerSwappedSection = () => {
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 md:gap-8 lg:gap-12 items-start">
           <div className="lg:col-span-3">
             <div className="flex items-center justify-between mb-4 md:mb-6">
-              <h2 className="text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 font-playfair tracking-tight">Top Trending Collection 2</h2>
+              <h2 className="text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 font-playfair tracking-tight">Lehenga</h2>
               <Link href={ROUTES.TRENDING} className="text-xs md:text-sm font-medium text-gray-700 hover:text-black transition-colors font-poppins whitespace-nowrap">
                 View All
               </Link>

@@ -18,7 +18,7 @@ export const BestSellingSection = () => {
             Best Selling
           </h2>
           <Link
-            href={ROUTES.PRODUCTS}
+            href={ROUTES.SHOP}
             className="text-sm md:text-base font-semibold text-primary hover:text-primary/80 transition-colors font-poppins"
           >
             View All →

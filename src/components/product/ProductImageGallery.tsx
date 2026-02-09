@@ -3,10 +3,13 @@
 import { useState } from "react";
 import Image from "next/image";
 import { ProductImage, ProductLabelType } from "@/types/product";
+import { wishlistService } from "@/features/wishlist/services/wishlist.service";
+import { useCartWishlist } from "@/contexts/CartWishlistContext";
 
 interface ProductImageGalleryProps {
   images: ProductImage[];
   productName: string;
+  productId: string;
   label?: {
     type: ProductLabelType;
     text: string;
@@ -14,11 +17,13 @@ interface ProductImageGalleryProps {
   bestseller?: boolean;
 }
 
-export const ProductImageGallery = ({ images, productName, label, bestseller }: ProductImageGalleryProps) => {
+export const ProductImageGallery = ({ images, productName, productId, label, bestseller }: ProductImageGalleryProps) => {
   const [selectedImage, setSelectedImage] = useState(0);
   const [isZoomed, setIsZoomed] = useState(false);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [isWishlisted, setIsWishlisted] = useState(false);
+  const [isAddingToWishlist, setIsAddingToWishlist] = useState(false);
+  const { incrementWishlistCount, decrementWishlistCount } = useCartWishlist();
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -119,8 +124,26 @@ export const ProductImageGallery = ({ images, productName, label, bestseller }: 
           )}
 
           <button
-            onClick={() => setIsWishlisted(!isWishlisted)}
-            className="absolute top-4 right-4 z-10 w-10 h-10 flex items-center justify-center bg-white rounded-full shadow-md hover:bg-gray-50 transition-colors"
+            onClick={async () => {
+              try {
+                setIsAddingToWishlist(true);
+                if (isWishlisted) {
+                  await wishlistService.removeFromWishlist(productId);
+                  setIsWishlisted(false);
+                  decrementWishlistCount();
+                } else {
+                  await wishlistService.addToWishlist({ productId });
+                  setIsWishlisted(true);
+                  incrementWishlistCount();
+                }
+              } catch (error) {
+                console.error("Failed to update wishlist:", error);
+              } finally {
+                setIsAddingToWishlist(false);
+              }
+            }}
+            disabled={isAddingToWishlist}
+            className="absolute top-4 right-4 z-10 w-10 h-10 flex items-center justify-center bg-white rounded-full shadow-md hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <svg
               className={`w-5 h-5 ${

@@ -2,9 +2,9 @@
 
 @theme {
   --color-primary: #222222;
-  --color-primary-dark: #5F0D24;
+  --color-primary-dark: #5f0d24;
   --color-primary-light: #444444;
-  --color-secondary: #5F0D24;
+  --color-secondary: #5f0d24;
   --color-secondary-dark: #786622;
   --color-accent: #f06543;
   --color-accent-hover: #e05533;
@@ -37,10 +37,10 @@
   --border-radius-md: 6px;
   --border-radius-lg: 8px;
 
-  --shadow-sm: 0 0 4px rgba(0,0,0,0.1);
-  --shadow: 0 0 15px rgba(5,0,0,0.1);
-  --shadow-md: 0 0 15px rgba(5,0,0,0.15);
-  --shadow-lg: 0 0 6px rgba(0,0,0,0.2);
+  --shadow-sm: 0 0 4px rgba(0, 0, 0, 0.1);
+  --shadow: 0 0 15px rgba(5, 0, 0, 0.1);
+  --shadow-md: 0 0 15px rgba(5, 0, 0, 0.15);
+  --shadow-lg: 0 0 6px rgba(0, 0, 0, 0.2);
 }
 
 * {
@@ -71,7 +71,7 @@ h6 {
 
 a {
   transition: color 0.3s ease-in-out;
-  cursor: pointer !important;
+  cursor: pointer;
 }
 
 img {

@@ -5,6 +5,7 @@ import { SITE_CONFIG } from "@/constants/site";
 import { TopBar } from "@/components/layout/TopBar";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
+import { CartWishlistProvider } from "@/contexts/CartWishlistContext";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -19,11 +20,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${playfair.variable} ${inter.variable} ${poppins.variable}`}>
-      <body className="min-h-screen flex flex-col">
-        <TopBar />
-        <Header />
-        <main className="flex-1">{children}</main>
-        <Footer />
+      <body className="min-h-screen flex flex-col" suppressHydrationWarning>
+        <CartWishlistProvider>
+          <TopBar />
+          <Header />
+          <main className="flex-1">{children}</main>
+          <Footer />
+        </CartWishlistProvider>
       </body>
     </html>
   );

@@ -9,6 +9,52 @@ interface ProductFiltersProps {
   availableSizes?: string[];
 }
 
+const getColorCode = (colorValue: string): string => {
+  // If it's already a hex code, return it
+  if (colorValue.startsWith("#")) {
+    return colorValue;
+  }
+  
+  // Otherwise, map color name to hex code
+  const colorMap: Record<string, string> = {
+    red: "#EF4444",
+    blue: "#3B82F6",
+    green: "#10B981",
+    yellow: "#FBBF24",
+    pink: "#EC4899",
+    purple: "#A855F7",
+    orange: "#F97316",
+    black: "#000000",
+    white: "#FFFFFF",
+    gray: "#6B7280",
+    grey: "#6B7280",
+    brown: "#92400E",
+    beige: "#D4C5B9",
+    gold: "#FFD700",
+    silver: "#C0C0C0",
+    maroon: "#800000",
+    navy: "#000080",
+    teal: "#008080",
+    olive: "#808000",
+    lime: "#00FF00",
+    cyan: "#00FFFF",
+    magenta: "#FF00FF",
+    indigo: "#4B0082",
+    violet: "#8B00FF",
+  };
+  
+  return colorMap[colorValue.toLowerCase()] || "#6B7280";
+};
+
+const getTextColor = (bgColor: string): string => {
+  const hex = bgColor.replace("#", "");
+  const r = parseInt(hex.substr(0, 2), 16);
+  const g = parseInt(hex.substr(2, 2), 16);
+  const b = parseInt(hex.substr(4, 2), 16);
+  const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+  return brightness > 128 ? "#000000" : "#FFFFFF";
+};
+
 export function ProductFilters({
   onFilterChange,
   availableColors = [],
@@ -131,24 +177,43 @@ export function ProductFilters({
         <div className="border-b border-border-light pb-4">
           <h4 className="font-poppins font-semibold mb-3">Color</h4>
           <div className="flex flex-wrap gap-2">
-            {availableColors.map((color) => (
-              <button
-                key={color}
-                onClick={() =>
-                  handleFilterChange(
-                    "color",
-                    filters.color === color ? undefined : color
-                  )
-                }
-                className={`px-3 py-1 text-sm border rounded-md font-poppins transition-colors ${
-                  filters.color === color
-                    ? "bg-secondary text-white border-secondary"
-                    : "border-border-light hover:border-secondary"
-                }`}
-              >
-                {color}
-              </button>
-            ))}
+            {availableColors.map((color) => {
+              const bgColor = getColorCode(color);
+              const isSelected = filters.color === color;
+              const isHexCode = color.startsWith("#");
+              
+              return (
+                <button
+                  key={color}
+                  onClick={() =>
+                    handleFilterChange(
+                      "color",
+                      filters.color === color ? undefined : color
+                    )
+                  }
+                  className={`rounded-md font-poppins transition-all ${
+                    isHexCode 
+                      ? "w-10 h-10" 
+                      : "px-3 py-1 text-sm"
+                  } ${
+                    isSelected
+                      ? "border-4 border-gray-900 ring-2 ring-offset-2 ring-gray-900"
+                      : "border-2 border-gray-300 hover:border-gray-500"
+                  }`}
+                  style={{
+                    backgroundColor: bgColor,
+                  }}
+                  title={color}
+                  aria-label={`Color: ${color}`}
+                >
+                  {!isHexCode && (
+                    <span style={{ color: getTextColor(bgColor) }}>
+                      {color}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
           </div>
         </div>
       )}

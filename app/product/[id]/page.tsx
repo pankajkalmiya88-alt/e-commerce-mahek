@@ -81,6 +81,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
           <ProductImageGallery
             images={product.images}
             productName={product.name}
+            productId={product.id}
             label={product.label}
             bestseller={product.bestseller}
           />

@@ -7,8 +7,10 @@ import { Product, ProductLabelType } from "@/types/product";
 import { ROUTES } from "@/constants/routes";
 import { cn } from "@/lib/utils/cn";
 import { wishlistService } from "@/features/wishlist/services/wishlist.service";
+import { cartService } from "@/features/cart/services/cart.service";
 import { isAuthenticated } from "@/lib/auth-utils";
 import { useRouter } from "next/navigation";
+import { useCartWishlist } from "@/contexts/CartWishlistContext";
 
 interface ProductCardProps {
   product: Product;
@@ -22,6 +24,8 @@ export const ProductCard = ({ product, className, variant = 'default' }: Product
   const isCompact = variant === 'compact';
   const [isInWishlist, setIsInWishlist] = useState(false);
   const [isAddingToWishlist, setIsAddingToWishlist] = useState(false);
+  const [isAddingToCart, setIsAddingToCart] = useState(false);
+  const { incrementCartCount, incrementWishlistCount, decrementWishlistCount } = useCartWishlist();
 
   const handleWishlistToggle = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -37,14 +41,39 @@ export const ProductCard = ({ product, className, variant = 'default' }: Product
       if (isInWishlist) {
         await wishlistService.removeFromWishlist(product.id);
         setIsInWishlist(false);
+        decrementWishlistCount();
       } else {
         await wishlistService.addToWishlist({ productId: product.id });
         setIsInWishlist(true);
+        incrementWishlistCount();
       }
     } catch (error) {
       console.error("Error toggling wishlist:", error);
     } finally {
       setIsAddingToWishlist(false);
+    }
+  };
+
+  const handleAddToCart = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!isAuthenticated()) {
+      router.push(`/login?referrer=${encodeURIComponent(window.location.pathname)}`);
+      return;
+    }
+
+    setIsAddingToCart(true);
+    try {
+      await cartService.addToCart({
+        productId: product.id,
+        quantity: 1,
+      });
+      incrementCartCount();
+    } catch (error) {
+      console.error("Error adding to cart:", error);
+    } finally {
+      setIsAddingToCart(false);
     }
   };
 
@@ -90,8 +119,12 @@ export const ProductCard = ({ product, className, variant = 'default' }: Product
         </button>
 
         <div className="absolute bottom-0 left-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-          <button className="w-full bg-white text-black px-4 py-3 text-sm font-semibold rounded hover:bg-gray-50 transition-colors shadow-lg font-poppins">
-            Add To Cart
+          <button
+            onClick={handleAddToCart}
+            disabled={isAddingToCart}
+            className="w-full bg-white text-black px-4 py-3 text-sm font-semibold rounded hover:bg-gray-50 transition-colors shadow-lg font-poppins disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isAddingToCart ? "Adding..." : "Add To Cart"}
           </button>
         </div>
       </div>

@@ -13,7 +13,7 @@ class WishlistService {
   async getWishlist(): Promise<WishlistResponse> {
     try {
       const response = await apiClient.get<WishlistResponse>(
-        `${BASE_URL}/wishlist/list`
+        `${BASE_URL}/wishlist/list`,
       );
       return response;
     } catch (error) {
@@ -64,6 +64,16 @@ class WishlistService {
     } catch (error) {
       console.error("Error adding to cart:", error);
       throw error;
+    }
+  }
+
+  async getWishlistCount(): Promise<number> {
+    try {
+      const response = await this.getWishlist();
+      return response.total;
+    } catch (error) {
+      console.error("Error fetching wishlist count:", error);
+      return 0;
     }
   }
 }

@@ -5,7 +5,7 @@ import type {
   ProductsListParams,
 } from "../types";
 
-const BASE_URL = "https://mahek-saree-develop.onrender.com/api";
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 class ProductService {
   async getProductsList(

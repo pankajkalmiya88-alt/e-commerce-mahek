@@ -16,7 +16,15 @@ interface ProductDetailPageProps {
 }
 
 export async function generateStaticParams() {
-  return [];
+  try {
+    const { products } = await productService.getProductsList({
+      limit: 500,
+      page: 1,
+    });
+    return products.map((product) => ({ id: product.slug }));
+  } catch {
+    return [];
+  }
 }
 
 export async function generateMetadata({ params }: ProductDetailPageProps): Promise<Metadata> {

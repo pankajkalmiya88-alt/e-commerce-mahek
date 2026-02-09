@@ -1,12 +1,16 @@
 import type { Metadata } from "next";
 import { playfair, inter, poppins } from "@/lib/fonts";
 import { generateSEO } from "@/lib/utils/seo";
+import { SITE_CONFIG } from "@/constants/site";
 import { TopBar } from "@/components/layout/TopBar";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import "./globals.css";
 
-export const metadata: Metadata = generateSEO();
+export const metadata: Metadata = {
+  metadataBase: new URL(SITE_CONFIG.url),
+  ...generateSEO(),
+};
 
 export default function RootLayout({
   children,

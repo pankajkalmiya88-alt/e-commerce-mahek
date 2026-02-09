@@ -1,6 +1,8 @@
 import apiClient from "@/lib/api-client";
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+const BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL ||
+  "https://maheksaree-production.up.railway.app/api";
 
 export interface AddToCartRequest {
   productId: string;

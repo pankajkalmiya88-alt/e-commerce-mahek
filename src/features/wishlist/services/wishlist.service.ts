@@ -7,7 +7,9 @@ import type {
   AddToCartRequest,
 } from "../types";
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+const BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL ||
+  "https://maheksaree-production.up.railway.app/api";
 
 class WishlistService {
   async getWishlist(): Promise<WishlistResponse> {

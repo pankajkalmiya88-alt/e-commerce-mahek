@@ -2,7 +2,7 @@ import { ANNOUNCEMENT_MESSAGES } from "@/constants/site";
 
 export const MarqueeBar = () => {
   return (
-    <div className="bg-rose-900 py-2 md:py-2.5 overflow-hidden">
+    <div className="bg-rose-900 py-2 md:py-2.5 overflow-hidden" suppressHydrationWarning>
       <div className="flex animate-marquee whitespace-nowrap">
         {[...ANNOUNCEMENT_MESSAGES, ...ANNOUNCEMENT_MESSAGES].map((message, index) => (
           <div key={index} className="flex items-center px-4 md:px-6">

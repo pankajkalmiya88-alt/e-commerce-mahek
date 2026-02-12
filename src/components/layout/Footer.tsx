@@ -5,7 +5,7 @@ import { CATEGORY_ROUTES, ROUTES } from "@/constants/routes";
 
 export const Footer = () => {
   return (
-    <footer className="bg-white border-t border-border">
+    <footer className="bg-white border-t border-border" suppressHydrationWarning>
       <div className="container-fluid py-6 md:py-8 lg:py-10">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 md:gap-8">
           <div>

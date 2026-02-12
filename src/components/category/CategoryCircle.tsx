@@ -16,7 +16,7 @@ export const CategoryCircle = ({
   className,
 }: CategoryCircleProps) => {
   return (
-    <div className={cn("flex flex-col items-center cursor-pointer", className)}>
+    <div className={cn("flex flex-col items-center cursor-pointer", className)} suppressHydrationWarning>
       <Link href={href} className="flex flex-col items-center">
         <div className="relative w-28 h-28 sm:w-32 sm:h-32 md:w-40 md:h-40 lg:w-48 lg:h-48 rounded-full overflow-hidden border-2 md:border-3 border-gray-200">
           <Image

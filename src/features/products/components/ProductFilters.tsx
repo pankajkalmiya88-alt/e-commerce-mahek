@@ -10,6 +10,11 @@ interface ProductFiltersProps {
 }
 
 const getColorCode = (colorValue: string): string => {
+  // Handle undefined or null values
+  if (!colorValue) {
+    return "#6B7280";
+  }
+  
   // If it's already a hex code, return it
   if (colorValue.startsWith("#")) {
     return colorValue;
@@ -177,7 +182,7 @@ export function ProductFilters({
         <div className="border-b border-border-light pb-4">
           <h4 className="font-poppins font-semibold mb-3">Color</h4>
           <div className="flex flex-wrap gap-2">
-            {availableColors.map((color) => {
+            {availableColors.filter(color => color).map((color) => {
               const bgColor = getColorCode(color);
               const isSelected = filters.color === color;
               const isHexCode = color.startsWith("#");
@@ -223,7 +228,7 @@ export function ProductFilters({
         <div className="border-b border-border-light pb-4">
           <h4 className="font-poppins font-semibold mb-3">Size</h4>
           <div className="flex flex-wrap gap-2">
-            {availableSizes.map((size) => (
+            {availableSizes.filter(size => size).map((size) => (
               <button
                 key={size}
                 onClick={() =>

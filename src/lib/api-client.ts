@@ -24,7 +24,7 @@ class ApiClient {
     this.baseURL =
       config.baseURL ||
       process.env.NEXT_PUBLIC_API_URL ||
-      "https://maheksaree-production.up.railway.app/api";
+      "https://api-dev.maheksarees.in/api";
     this.defaultHeaders = config.headers || {};
   }
 
@@ -92,11 +92,9 @@ class ApiClient {
       response = await this.applyResponseInterceptors(response);
 
       if (!response.ok) {
-        const error = await response
-          .json()
-          .catch(() => ({
-            message: `Request failed with status ${response.status}`,
-          }));
+        const error = await response.json().catch(() => ({
+          message: `Request failed with status ${response.status}`,
+        }));
         throw new Error(
           error.message || `Request failed with status ${response.status}`,
         );

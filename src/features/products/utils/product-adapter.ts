@@ -12,7 +12,7 @@ export function adaptAPIProductToUI(apiProduct: APIProduct): UIProduct {
     slug: apiProduct.slug,
     description: apiProduct.description,
     shortDescription: apiProduct.description?.substring(0, 150),
-    images: apiProduct.images.map((url) => ({
+    images: (apiProduct.images || []).map((url) => ({
       url: url,
       alt: apiProduct.name,
     })),

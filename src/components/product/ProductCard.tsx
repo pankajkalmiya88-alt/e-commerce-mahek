@@ -78,17 +78,23 @@ export const ProductCard = ({ product, className, variant = 'default' }: Product
   };
 
   return (
-    <div className={cn("group w-full bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow", className)}>
+    <div className={cn("group w-full bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow", className)} suppressHydrationWarning>
       <div className="relative overflow-hidden">
         <Link href={productUrl}>
           <div className="relative aspect-[3/4] w-full">
-            <Image
-              src={product.images[0].url}
-              alt={product.images[0].alt}
-              fill
-              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-              className="object-cover group-hover:scale-105 transition-transform duration-500"
-            />
+            {product.images && product.images.length > 0 ? (
+              <Image
+                src={product.images[0].url}
+                alt={product.images[0].alt}
+                fill
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                className="object-cover group-hover:scale-105 transition-transform duration-500"
+              />
+            ) : (
+              <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                <span className="text-gray-400 text-sm">No Image</span>
+              </div>
+            )}
           </div>
         </Link>
 

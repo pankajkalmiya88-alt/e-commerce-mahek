@@ -8,8 +8,7 @@ import type {
 } from "../types";
 
 const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL ||
-  "https://maheksaree-production.up.railway.app/api";
+  process.env.NEXT_PUBLIC_API_URL || "https://api-dev.maheksarees.in/api";
 
 export const authService = {
   async sendOtp(data: SendOtpRequest): Promise<SendOtpResponse> {

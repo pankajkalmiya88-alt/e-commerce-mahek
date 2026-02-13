@@ -3,7 +3,7 @@ import Link from "next/link";
 
 export const GallerySection = () => {
   return (
-    <section className="bg-white py-10 md:py-14 lg:py-18" suppressHydrationWarning>
+    <section className="bg-white py-10 md:py-14 lg:py-18">
       <div className="max-w-7xl mx-auto px-4 md:px-8 lg:px-16">
         <div className="grid gap-4 md:gap-5 grid-cols-1 md:grid-cols-3">
         <Link

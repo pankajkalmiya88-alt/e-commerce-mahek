@@ -78,7 +78,7 @@ export const ProductCard = ({ product, className, variant = 'default' }: Product
   };
 
   return (
-    <div className={cn("group w-full bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow", className)} suppressHydrationWarning>
+    <div className={cn("group w-full bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow", className)}>
       <div className="relative overflow-hidden">
         <Link href={productUrl}>
           <div className="relative aspect-[3/4] w-full">
@@ -155,13 +155,19 @@ export const ProductCard = ({ product, className, variant = 'default' }: Product
         </div>
 
         <div className="flex items-center justify-center gap-2">
-          <span className="text-lg font-bold text-gray-900 font-poppins">
-            ₹{product.price.current.toLocaleString()}
-          </span>
-          {product.price.original && product.price.original > product.price.current && (
-            <span className="text-sm text-gray-400 line-through font-poppins">
-              ₹{product.price.original.toLocaleString()}
-            </span>
+          {product.price?.current !== undefined ? (
+            <>
+              <span className="text-lg font-bold text-gray-900 font-poppins">
+                ₹{product.price.current.toLocaleString()}
+              </span>
+              {product.price.original && product.price.original > product.price.current && (
+                <span className="text-sm text-gray-400 line-through font-poppins">
+                  ₹{product.price.original.toLocaleString()}
+                </span>
+              )}
+            </>
+          ) : (
+            <span className="text-sm text-gray-500 font-poppins">Price not available</span>
           )}
         </div>
       </div>

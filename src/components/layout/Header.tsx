@@ -52,7 +52,7 @@ export const Header = () => {
   }, []);
 
   return (
-    <header className="bg-white border-b border-border-light relative z-49" suppressHydrationWarning>
+    <header className="bg-white border-b border-border-light relative z-49">
       <div className="container-fluid">
         <div className="flex items-center justify-between min-h-[60px] py-2">
           <div className="flex items-center gap-4">

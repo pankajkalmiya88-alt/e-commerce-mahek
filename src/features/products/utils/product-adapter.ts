@@ -17,7 +17,7 @@ export function adaptAPIProductToUI(apiProduct: APIProduct): UIProduct {
       alt: apiProduct.name,
     })),
     price: {
-      current: apiProduct.price,
+      current: apiProduct.price ?? 0,
       original: apiProduct.oldPrice,
       discount: apiProduct.discountPercent,
     },

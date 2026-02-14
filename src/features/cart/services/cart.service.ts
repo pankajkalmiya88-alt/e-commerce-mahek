@@ -1,15 +1,32 @@
 import apiClient from "@/lib/api-client";
 
 const BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || "https://api-dev.maheksarees.in/api";
+  process.env.NEXT_PUBLIC_API_URL || "https://api-dev.maheksarees.in/api/";
 
 export interface AddToCartRequest {
   productId: string;
+  variantId: string;
+  size: string;
   quantity: number;
+}
+
+export interface UpdateCartRequest {
+  productId: string;
+  variantId: string;
+  size: string;
+  quantity: number;
+}
+
+export interface RemoveFromCartRequest {
+  productId: string;
+  variantId: string;
+  size: string;
 }
 
 export interface CartItem {
   productId: string;
+  variantId: string;
+  size: string;
   quantity: number;
 }
 
@@ -18,9 +35,27 @@ class CartService {
 
   async addToCart(data: AddToCartRequest): Promise<void> {
     try {
-      await apiClient.post(`${BASE_URL}/cart/add`, data);
+      await apiClient.post(`${BASE_URL}cart/add`, data);
     } catch (error) {
       console.error("Error adding to cart:", error);
+      throw error;
+    }
+  }
+
+  async updateCart(data: UpdateCartRequest): Promise<void> {
+    try {
+      await apiClient.post(`${BASE_URL}cart/update`, data);
+    } catch (error) {
+      console.error("Error updating cart:", error);
+      throw error;
+    }
+  }
+
+  async removeFromCart(data: RemoveFromCartRequest): Promise<void> {
+    try {
+      await apiClient.post(`${BASE_URL}cart/remove`, data);
+    } catch (error) {
+      console.error("Error removing from cart:", error);
       throw error;
     }
   }

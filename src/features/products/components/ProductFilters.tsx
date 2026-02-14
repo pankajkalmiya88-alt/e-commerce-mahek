@@ -3,9 +3,14 @@
 import { useState } from "react";
 import { ProductsListParams } from "../types";
 
+interface ColorOption {
+  color: string;
+  count: number;
+}
+
 interface ProductFiltersProps {
   onFilterChange: (filters: ProductsListParams) => void;
-  availableColors?: string[];
+  availableColors?: ColorOption[];
   availableSizes?: string[];
 }
 
@@ -69,6 +74,7 @@ export function ProductFilters({
     limit: 10,
     page: 1,
   });
+  const [colorSearchQuery, setColorSearchQuery] = useState("");
 
   const handleFilterChange = (key: keyof ProductsListParams, value: any) => {
     const newFilters = { ...filters, [key]: value, page: 1 };
@@ -180,45 +186,68 @@ export function ProductFilters({
       {/* Colors */}
       {availableColors.length > 0 && (
         <div className="border-b border-border-light pb-4">
-          <h4 className="font-poppins font-semibold mb-3">Color</h4>
-          <div className="flex flex-wrap gap-2">
-            {availableColors.filter(color => color).map((color) => {
-              const bgColor = getColorCode(color);
-              const isSelected = filters.color === color;
-              const isHexCode = color.startsWith("#");
-              
-              return (
-                <button
-                  key={color}
-                  onClick={() =>
-                    handleFilterChange(
-                      "color",
-                      filters.color === color ? undefined : color
-                    )
-                  }
-                  className={`rounded-md font-poppins transition-all ${
-                    isHexCode 
-                      ? "w-10 h-10" 
-                      : "px-3 py-1 text-sm"
-                  } ${
-                    isSelected
-                      ? "border-4 border-gray-900 ring-2 ring-offset-2 ring-gray-900"
-                      : "border-2 border-gray-300 hover:border-gray-500"
-                  }`}
-                  style={{
-                    backgroundColor: bgColor,
-                  }}
-                  title={color}
-                  aria-label={`Color: ${color}`}
-                >
-                  {!isHexCode && (
-                    <span style={{ color: getTextColor(bgColor) }}>
+          <div className="flex items-center justify-between mb-3">
+            <h4 className="font-poppins font-semibold uppercase text-sm">COLOR</h4>
+            <button className="text-gray-400 hover:text-gray-600">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </button>
+          </div>
+          
+          {/* Search Input */}
+          <div className="relative mb-3">
+            <input
+              type="text"
+              placeholder="Search colors..."
+              value={colorSearchQuery}
+              onChange={(e) => setColorSearchQuery(e.target.value)}
+              className="w-full px-3 py-2 pr-8 border border-border-light rounded-md font-poppins text-sm focus:outline-none focus:border-secondary"
+            />
+            <svg className="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
+
+          {/* Color List */}
+          <div className="space-y-2 max-h-64 overflow-y-auto">
+            {availableColors
+              .filter(({ color }) => 
+                color.toLowerCase().includes(colorSearchQuery.toLowerCase())
+              )
+              .map(({ color, count }) => {
+                const bgColor = getColorCode(color);
+                const isSelected = filters.color === color;
+                
+                return (
+                  <label
+                    key={color}
+                    className="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded-md transition-colors"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={isSelected}
+                      onChange={() =>
+                        handleFilterChange(
+                          "color",
+                          filters.color === color ? undefined : color
+                        )
+                      }
+                      className="w-4 h-4 text-secondary border-gray-300 rounded focus:ring-secondary"
+                    />
+                    <div
+                      className="w-5 h-5 rounded-full border border-gray-300 flex-shrink-0"
+                      style={{ backgroundColor: bgColor }}
+                    />
+                    <span className="flex-1 text-sm font-poppins capitalize">
                       {color}
                     </span>
-                  )}
-                </button>
-              );
-            })}
+                    <span className="text-xs text-gray-400 font-poppins">
+                      ({count})
+                    </span>
+                  </label>
+                );
+              })}
           </div>
         </div>
       )}

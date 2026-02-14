@@ -61,10 +61,19 @@ export function CategoryPageContent({
     setFilters({ ...filters, page });
   };
 
-  const availableColors = Array.from(
-    new Set(products.flatMap((p) => p.colors))
-  );
-  const availableSizes = Array.from(new Set(products.flatMap((p) => p.sizes)));
+  const colorCounts = products.reduce((acc, product) => {
+    product.allColors.forEach((color) => {
+      acc[color] = (acc[color] || 0) + 1;
+    });
+    return acc;
+  }, {} as Record<string, number>);
+
+  const availableColors = Object.entries(colorCounts).map(([color, count]) => ({
+    color,
+    count,
+  }));
+
+  const availableSizes = Array.from(new Set(products.flatMap((p) => p.allSizes)));
 
   return (
     <div className="min-h-screen bg-background-light">

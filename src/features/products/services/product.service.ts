@@ -6,7 +6,7 @@ import type {
 } from "../types";
 
 const BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || "https://api-dev.maheksarees.in/api";
+  process.env.NEXT_PUBLIC_API_URL || "https://api-dev.maheksarees.in/api/";
 
 class ProductService {
   async getProductsList(
@@ -27,7 +27,7 @@ class ProductService {
       queryParams.append("availability", params.availability);
     if (params.page) queryParams.append("page", params.page.toString());
 
-    const url = `${BASE_URL}/products/list${
+    const url = `${BASE_URL}products/list${
       queryParams.toString() ? `?${queryParams.toString()}` : ""
     }`;
 
@@ -43,7 +43,7 @@ class ProductService {
   async getProductBySlug(slug: string): Promise<Product> {
     try {
       const response = await apiClient.get<Product>(
-        `${BASE_URL}/products/${slug}`,
+        `${BASE_URL}products/${slug}`,
       );
       return response;
     } catch (error) {
@@ -55,7 +55,7 @@ class ProductService {
   async getProductById(id: string): Promise<Product> {
     try {
       const response = await apiClient.get<Product>(
-        `${BASE_URL}/products/${id}`,
+        `${BASE_URL}products/${id}`,
       );
       return response;
     } catch (error) {

@@ -198,6 +198,7 @@ Every code change must explain:
 
 # Documentation Rules
 
+- Never Auto Create Documentation until asked
 - All guide MD files must be created in `public\docs`
 - This ensures documentation is accessible and organized in a single location
 - Never create guide files in root or other directories

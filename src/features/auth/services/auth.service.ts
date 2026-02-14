@@ -8,15 +8,15 @@ import type {
 } from "../types";
 
 const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || "https://api-dev.maheksarees.in/api";
+  process.env.NEXT_PUBLIC_API_URL || "https://api-dev.maheksarees.in/api/";
 
 export const authService = {
   async sendOtp(data: SendOtpRequest): Promise<SendOtpResponse> {
-    return apiClient.post<SendOtpResponse>("/auth/send-otp", data);
+    return apiClient.post<SendOtpResponse>("auth/send-otp", data);
   },
 
   async verifyOtp(data: VerifyOtpRequest): Promise<VerifyOtpResponse> {
-    const response = await fetch(`${API_BASE_URL}/auth/verify-otp`, {
+    const response = await fetch(`${API_BASE_URL}auth/verify-otp`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

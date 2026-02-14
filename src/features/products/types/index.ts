@@ -1,28 +1,44 @@
+export interface ProductVariantSize {
+  size: string;
+  stock: number;
+}
+
+export interface ProductVariant {
+  variantId: string;
+  color: string;
+  sellingPrice: number;
+  mrp: number;
+  sizes: ProductVariantSize[];
+  images: string[];
+  sizeDetails: string;
+}
+
 export interface Product {
   _id: string;
   name: string;
   slug: string;
-  price: number;
-  discountPercent: number;
-  oldPrice?: number;
-  stock: number;
-  sizes: string[];
-  isActive: boolean;
+  brand: string;
   category: string;
-  images: string[];
-  colors: string[];
+  subCategory: string;
+  pattern: string;
+  sleeveType: string;
+  fabric: string;
+  neckType: string;
   description: string;
+  isActive: boolean;
+  isFeatured: boolean;
+  avgPrice: number;
+  totalStock: number;
+  allImages: string[];
+  allColors: string[];
+  allSizes: string[];
+  variants: ProductVariant[];
   averageRating: number;
   totalReviews: number;
   reviews: any[];
   createdAt: string;
   updatedAt: string;
-  availability?: "IN_STOCK" | "OUT_OF_STOCK" | "PRE_ORDER";
-  isFeatured?: boolean;
-  discountLabel?: string;
-  features?: string[];
-  washingInstructions?: string[];
-  disclaimer?: string;
+  __v?: number;
 }
 
 export interface ProductsListResponse {

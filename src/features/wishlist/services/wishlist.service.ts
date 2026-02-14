@@ -8,13 +8,13 @@ import type {
 } from "../types";
 
 const BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || "https://api-dev.maheksarees.in/api";
+  process.env.NEXT_PUBLIC_API_URL || "https://api-dev.maheksarees.in/api/";
 
 class WishlistService {
   async getWishlist(): Promise<WishlistResponse> {
     try {
       const response = await apiClient.get<WishlistResponse>(
-        `${BASE_URL}/wishlist/list`,
+        `${BASE_URL}wishlist/list`,
       );
       return response;
     } catch (error) {
@@ -25,7 +25,7 @@ class WishlistService {
 
   async addToWishlist(data: AddToWishlistRequest): Promise<void> {
     try {
-      await apiClient.post(`${BASE_URL}/wishlist/add`, data);
+      await apiClient.post(`${BASE_URL}wishlist/add`, data);
     } catch (error) {
       console.error("Error adding to wishlist:", error);
       throw error;
@@ -34,7 +34,7 @@ class WishlistService {
 
   async removeFromWishlist(productId: string): Promise<void> {
     try {
-      await apiClient.delete(`${BASE_URL}/wishlist/remove/${productId}`);
+      await apiClient.delete(`${BASE_URL}wishlist/remove/${productId}`);
     } catch (error) {
       console.error("Error removing from wishlist:", error);
       throw error;
@@ -43,7 +43,7 @@ class WishlistService {
 
   async moveToCart(data: MoveToCartRequest): Promise<void> {
     try {
-      await apiClient.post(`${BASE_URL}/wishlist/move-to-cart`, data);
+      await apiClient.post(`${BASE_URL}wishlist/move-to-cart`, data);
     } catch (error) {
       console.error("Error moving to cart:", error);
       throw error;
@@ -52,18 +52,9 @@ class WishlistService {
 
   async bulkMoveToCart(data: BulkMoveToCartRequest): Promise<void> {
     try {
-      await apiClient.post(`${BASE_URL}/wishlist/bulk-move-to-cart`, data);
+      await apiClient.post(`${BASE_URL}wishlist/bulk-move-to-cart`, data);
     } catch (error) {
       console.error("Error bulk moving to cart:", error);
-      throw error;
-    }
-  }
-
-  async addToCart(data: AddToCartRequest): Promise<void> {
-    try {
-      await apiClient.post(`${BASE_URL}/cart/add-to-cart`, data);
-    } catch (error) {
-      console.error("Error adding to cart:", error);
       throw error;
     }
   }

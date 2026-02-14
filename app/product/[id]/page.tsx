@@ -135,7 +135,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
               </div>
             </div>
 
-            <ProductDetailClient product={product} />
+            <ProductDetailClient product={product} apiProduct={apiProduct} />
           </div>
         </div>
 

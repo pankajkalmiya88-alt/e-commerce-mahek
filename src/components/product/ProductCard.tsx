@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Product, ProductLabelType } from "@/types/product";
@@ -25,7 +25,30 @@ export const ProductCard = ({ product, className, variant = 'default' }: Product
   const [isInWishlist, setIsInWishlist] = useState(false);
   const [isAddingToWishlist, setIsAddingToWishlist] = useState(false);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [isHovering, setIsHovering] = useState(false);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const { incrementCartCount, incrementWishlistCount, decrementWishlistCount } = useCartWishlist();
+
+  useEffect(() => {
+    if (isHovering && product.images.length > 1) {
+      intervalRef.current = setInterval(() => {
+        setCurrentImageIndex((prev) => (prev + 1) % product.images.length);
+      }, 500);
+    } else {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+      setCurrentImageIndex(0);
+    }
+
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
+  }, [isHovering, product.images.length]);
 
   const handleWishlistToggle = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -65,8 +88,14 @@ export const ProductCard = ({ product, className, variant = 'default' }: Product
 
     setIsAddingToCart(true);
     try {
+      const defaultSize = product.sizes && product.sizes.length > 0 
+        ? product.sizes[0].name 
+        : "FREE";
+      
       await cartService.addToCart({
         productId: product.id,
+        variantId: `${product.id}_variant_1`,
+        size: defaultSize,
         quantity: 1,
       });
       incrementCartCount();
@@ -78,17 +107,22 @@ export const ProductCard = ({ product, className, variant = 'default' }: Product
   };
 
   return (
-    <div className={cn("group w-full bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow", className)}>
-      <div className="relative overflow-hidden">
+    <div className={cn("group w-full bg-white overflow-hidden transition-shadow", className)}>
+      <div 
+        className="relative overflow-hidden"
+        onMouseEnter={() => setIsHovering(true)}
+        onMouseLeave={() => setIsHovering(false)}
+      >
         <Link href={productUrl}>
-          <div className="relative aspect-[3/4] w-full">
+          <div className="relative aspect-[3/4] w-full bg-gray-100">
             {product.images && product.images.length > 0 ? (
               <Image
-                src={product.images[0].url}
-                alt={product.images[0].alt}
+                src={product.images[currentImageIndex].url}
+                alt={product.images[currentImageIndex].alt}
                 fill
                 sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                className="object-cover group-hover:scale-105 transition-transform duration-500"
+                className="object-cover transition-opacity duration-300"
+                priority={currentImageIndex === 0}
               />
             ) : (
               <div className="w-full h-full bg-gray-200 flex items-center justify-center">
@@ -98,9 +132,25 @@ export const ProductCard = ({ product, className, variant = 'default' }: Product
           </div>
         </Link>
 
-        {product.price.discount && product.price.discount > 0 && (
-          <div className="absolute top-2 left-2 bg-red-600 text-white text-xs font-bold px-2.5 py-1 rounded font-poppins">
-            -{product.price.discount}%
+        {product.label?.type === ProductLabelType.NEW && (
+          <div className="absolute top-2 left-2 text-white text-xs font-bold px-2 py-1 uppercase font-poppins" style={{ backgroundColor: '#C1272D' }}>
+            NEW
+          </div>
+        )}
+
+        {product.label?.type === ProductLabelType.SALE && (
+          <div className="absolute top-2 left-2 text-white text-xs font-bold px-2 py-1 uppercase font-poppins" style={{ backgroundColor: '#C1272D' }}>
+            SALE
+          </div>
+        )}
+
+        {product.rating && product.rating.average > 0 && (
+          <div className="absolute top-2 left-2 bg-white rounded px-2 py-1 shadow-sm flex items-center gap-1">
+            <span className="text-xs font-semibold font-poppins">{product.rating.average.toFixed(1)}</span>
+            <svg className="w-3 h-3 text-yellow-400 fill-current" viewBox="0 0 20 20">
+              <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
+            </svg>
+            <span className="text-xs text-gray-400 font-poppins">| {product.rating.count}</span>
           </div>
         )}
 
@@ -124,46 +174,84 @@ export const ProductCard = ({ product, className, variant = 'default' }: Product
           </svg>
         </button>
 
-        <div className="absolute bottom-0 left-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-          <button
-            onClick={handleAddToCart}
-            disabled={isAddingToCart}
-            className="w-full bg-white text-black px-4 py-3 text-sm font-semibold rounded hover:bg-gray-50 transition-colors shadow-lg font-poppins disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {isAddingToCart ? "Adding..." : "Add To Cart"}
-          </button>
-        </div>
+        {product.images.length > 1 && (
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1">
+            {product.images.map((_, index) => (
+              <div
+                key={index}
+                className={cn(
+                  "w-1.5 h-1.5 rounded-full transition-colors",
+                  index === currentImageIndex ? "bg-gray-300" : "bg-gray-300"
+                )}
+                style={index === currentImageIndex ? { backgroundColor: '#C1272D' } : {}}
+              />
+            ))}
+          </div>
+        )}
       </div>
 
-      <div className="p-4 text-center bg-white">
+      <div className="p-3">
+        <button
+          onClick={handleAddToCart}
+          disabled={isAddingToCart}
+          className="w-full border border-gray-300 rounded px-4 py-2 text-sm font-semibold font-poppins transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+          style={{
+            borderColor: isAddingToCart ? '#C1272D' : undefined,
+            color: isAddingToCart ? '#C1272D' : undefined,
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.borderColor = '#C1272D';
+            e.currentTarget.style.color = '#C1272D';
+          }}
+          onMouseLeave={(e) => {
+            if (!isAddingToCart) {
+              e.currentTarget.style.borderColor = '';
+              e.currentTarget.style.color = '';
+            }
+          }}
+        >
+          <svg
+            className="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+          </svg>
+          {isAddingToCart ? "ADDING..." : "ADD TO CART"}
+        </button>
+
+        {product.sizes && product.sizes.length > 0 && (
+          <div className="mt-2 text-xs text-gray-600 font-poppins">
+            Sizes: {product.sizes.slice(0, 3).map(s => s.name).join(", ")}{product.sizes.length > 3 ? "..." : ""}
+          </div>
+        )}
+
         <Link href={productUrl}>
-          <h3 className="text-sm font-medium text-gray-900 mb-2 font-playfair hover:text-gray-700 transition-colors line-clamp-2 min-h-[2.5rem]">
+          <h3 className="text-sm font-medium text-gray-900 mt-3 mb-2 font-poppins hover:text-gray-700 transition-colors line-clamp-2 uppercase">
             {product.name}
           </h3>
         </Link>
 
-        <div className="flex items-center justify-center gap-0.5 mb-2">
-          {[...Array(5)].map((_, i) => (
-            <svg
-              key={i}
-              className={`w-4 h-4 ${i < Math.floor(product.rating?.average || 4) ? 'text-yellow-400' : 'text-gray-300'} fill-current`}
-              viewBox="0 0 20 20"
-            >
-              <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
-            </svg>
-          ))}
-        </div>
+        <p className="text-xs text-gray-500 font-poppins line-clamp-1 mb-2">
+          {product.shortDescription || product.category}
+        </p>
 
-        <div className="flex items-center justify-center gap-2">
+        <div className="flex items-baseline gap-2">
           {product.price?.current !== undefined ? (
             <>
               <span className="text-lg font-bold text-gray-900 font-poppins">
-                ₹{product.price.current.toLocaleString()}
+                Rs. {product.price.current.toLocaleString()}
               </span>
               {product.price.original && product.price.original > product.price.current && (
-                <span className="text-sm text-gray-400 line-through font-poppins">
-                  ₹{product.price.original.toLocaleString()}
-                </span>
+                <>
+                  <span className="text-sm text-gray-400 line-through font-poppins">
+                    Rs. {product.price.original.toLocaleString()}
+                  </span>
+                  <span className="text-sm text-orange-500 font-semibold font-poppins">
+                    ({product.price.discount}% OFF)
+                  </span>
+                </>
               )}
             </>
           ) : (

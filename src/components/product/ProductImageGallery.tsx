@@ -25,6 +25,19 @@ export const ProductImageGallery = ({ images, productName, productId, label, bes
   const [isAddingToWishlist, setIsAddingToWishlist] = useState(false);
   const { incrementWishlistCount, decrementWishlistCount } = useCartWishlist();
 
+  if (!images || images.length === 0) {
+    return (
+      <div className="flex items-center justify-center w-full h-[400px] md:h-[500px] lg:h-[600px] bg-gray-100 rounded-lg">
+        <div className="text-center">
+          <svg className="w-16 h-16 mx-auto text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+          <p className="text-gray-500 font-poppins">No images available</p>
+        </div>
+      </div>
+    );
+  }
+
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
     const x = ((e.clientX - rect.left) / rect.width) * 100;
@@ -39,6 +52,8 @@ export const ProductImageGallery = ({ images, productName, productId, label, bes
   const handleNext = () => {
     setSelectedImage((prev) => (prev === images.length - 1 ? 0 : prev + 1));
   };
+
+  const currentImage = images[selectedImage] || images[0];
 
   return (
     <div className="flex flex-col-reverse lg:flex-row gap-4">
@@ -87,8 +102,8 @@ export const ProductImageGallery = ({ images, productName, productId, label, bes
           onMouseMove={handleMouseMove}
         >
           <Image
-            src={images[selectedImage].url}
-            alt={images[selectedImage].alt}
+            src={currentImage.url}
+            alt={currentImage.alt}
             fill
             className={`object-cover transition-transform duration-300 ${
               isZoomed ? "scale-300" : "scale-100"

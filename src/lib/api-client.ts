@@ -24,7 +24,7 @@ class ApiClient {
     this.baseURL =
       config.baseURL ||
       process.env.NEXT_PUBLIC_API_URL ||
-      "https://api-dev.maheksarees.in/api";
+      "https://api-dev.maheksarees.in/api/";
     this.defaultHeaders = config.headers || {};
   }
 

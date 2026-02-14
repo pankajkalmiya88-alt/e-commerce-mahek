@@ -4,12 +4,14 @@ import { useState } from "react";
 import { Product } from "@/types/product";
 import { cartService } from "@/features/cart/services/cart.service";
 import { useCartWishlist } from "@/contexts/CartWishlistContext";
+import { Product as APIProduct } from "@/features/products/types";
 
 interface ProductDetailClientProps {
   product: Product;
+  apiProduct?: APIProduct;
 }
 
-export function ProductDetailClient({ product }: ProductDetailClientProps) {
+export function ProductDetailClient({ product, apiProduct }: ProductDetailClientProps) {
   const [quantity, setQuantity] = useState(1);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
@@ -20,8 +22,18 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
       setIsAddingToCart(true);
       setMessage(null);
 
+      const firstVariant = apiProduct?.variants[0];
+      const firstSize = firstVariant?.sizes[0]?.size || "FREE";
+
+      if (!firstVariant) {
+        setMessage({ type: "error", text: "Product variant not available." });
+        return;
+      }
+
       await cartService.addToCart({
         productId: product.id,
+        variantId: firstVariant.variantId,
+        size: firstSize,
         quantity,
       });
 

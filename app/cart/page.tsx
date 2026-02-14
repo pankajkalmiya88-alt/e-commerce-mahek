@@ -7,7 +7,8 @@ import { isAuthenticated } from "@/lib/auth-utils";
 import { cartService } from "@/features/cart/services/cart.service";
 import { CartItem } from "@/features/cart/components/CartItem";
 import { useCartWishlist } from "@/contexts/CartWishlistContext";
-import type { CartItem as CartItemType } from "@/features/cart/services/cart.service";
+import type { UICartItem } from "@/features/cart/adapters/cart.adapter";
+import { enrichCartItemsWithImages } from "@/features/cart/adapters/cart.adapter";
 import { ROUTES } from "@/constants/routes";
 import { toast } from "@/lib/toast";
 
@@ -16,7 +17,7 @@ export default function CartPage() {
   const { refreshCounts } = useCartWishlist();
   const [isAuth, setIsAuth] = useState(false);
   const [isChecking, setIsChecking] = useState(true);
-  const [cartItems, setCartItems] = useState<CartItemType[]>([]);
+  const [cartItems, setCartItems] = useState<UICartItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -39,7 +40,8 @@ export default function CartPage() {
     setLoading(true);
     try {
       const response = await cartService.getCartList();
-      setCartItems(response.items || []);
+      const enrichedItems = await enrichCartItemsWithImages(response.items || []);
+      setCartItems(enrichedItems);
     } catch (error) {
       console.error("Error fetching cart:", error);
       toast.error("Failed to load cart items");

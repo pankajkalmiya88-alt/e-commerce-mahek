@@ -1,3 +1,5 @@
+import { toast } from "./toast";
+
 type RequestInterceptor = (
   config: RequestConfig,
 ) => RequestConfig | Promise<RequestConfig>;
@@ -172,12 +174,20 @@ apiClient.addResponseInterceptor((response) => {
 });
 
 apiClient.addErrorInterceptor((error) => {
-  if (error.message.includes("401") || error.message.includes("Unauthorized")) {
-    if (typeof window !== "undefined") {
+  if (typeof window !== "undefined") {
+    // Handle 401 Unauthorized - redirect to login
+    if (
+      error.message.includes("401") ||
+      error.message.includes("Unauthorized")
+    ) {
       localStorage.removeItem("authToken");
       localStorage.removeItem("userData");
       window.location.href = "/login";
+      return;
     }
+
+    // Show error toast for all other API errors
+    toast.handleAPIError(error);
   }
 });
 

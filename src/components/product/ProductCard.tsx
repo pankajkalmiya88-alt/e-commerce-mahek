@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { Tooltip } from "react-tooltip";
 import { Product, ProductLabelType } from "@/types/product";
 import { ROUTES } from "@/constants/routes";
 import { cn } from "@/lib/utils/cn";
@@ -17,19 +18,25 @@ interface ProductCardProps {
   className?: string;
   variant?: 'default' | 'compact';
   apiProduct?: any; // Original API product with variants
+  initialWishlistState?: boolean;
+  onWishlistChange?: () => void | Promise<void>;
 }
 
-export const ProductCard = ({ product, className, variant = 'default', apiProduct }: ProductCardProps) => {
+export const ProductCard = ({ product, className, variant = 'default', apiProduct, initialWishlistState = false, onWishlistChange }: ProductCardProps) => {
   const router = useRouter();
   const productUrl = ROUTES.PRODUCT_DETAIL(product.id);
   const isCompact = variant === 'compact';
-  const [isInWishlist, setIsInWishlist] = useState(false);
+  const [isInWishlist, setIsInWishlist] = useState(initialWishlistState);
   const [isAddingToWishlist, setIsAddingToWishlist] = useState(false);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isHovering, setIsHovering] = useState(false);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const { incrementCartCount, incrementWishlistCount, decrementWishlistCount } = useCartWishlist();
+
+  useEffect(() => {
+    setIsInWishlist(initialWishlistState);
+  }, [initialWishlistState]);
 
   useEffect(() => {
     if (isHovering && product.images.length > 1) {
@@ -91,6 +98,11 @@ export const ProductCard = ({ product, className, variant = 'default', apiProduc
         });
         setIsInWishlist(true);
         incrementWishlistCount();
+      }
+      
+      // Notify parent component to refresh wishlist
+      if (onWishlistChange) {
+        await onWishlistChange();
       }
     } catch (error) {
       console.error("Error toggling wishlist:", error);
@@ -263,14 +275,32 @@ export const ProductCard = ({ product, className, variant = 'default', apiProduc
         )}
 
         <Link href={productUrl}>
-          <h3 className="text-sm font-medium text-gray-900 mt-3 mb-2 font-poppins hover:text-gray-700 transition-colors line-clamp-2 uppercase">
+          <h3 
+            className="text-sm font-medium text-gray-900 mt-3 mb-2 font-poppins hover:text-gray-700 transition-colors line-clamp-2 uppercase"
+            data-tooltip-id={`product-card-${product.id}`}
+            data-tooltip-content={product.name}
+          >
             {product.name}
           </h3>
         </Link>
+        <Tooltip 
+          id={`product-card-${product.id}`}
+          place="top"
+          className="!bg-gray-900 !text-white !text-sm !px-3 !py-2 !rounded !z-50"
+        />
 
-        <p className="text-xs text-gray-500 font-poppins line-clamp-1 mb-2">
+        <p 
+          className="text-xs text-gray-500 font-poppins line-clamp-1 mb-2"
+          data-tooltip-id={`product-desc-${product.id}`}
+          data-tooltip-content={product.shortDescription || product.category}
+        >
           {product.shortDescription || product.category}
         </p>
+        <Tooltip 
+          id={`product-desc-${product.id}`}
+          place="top"
+          className="!bg-gray-900 !text-white !text-sm !px-3 !py-2 !rounded !z-50"
+        />
 
         <div className="flex items-baseline gap-2">
           {product.price?.current !== undefined ? (

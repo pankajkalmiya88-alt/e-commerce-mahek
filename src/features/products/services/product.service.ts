@@ -35,10 +35,6 @@ class ProductService extends BaseService {
     );
   }
 
-  async getProductBySlug(slug: string): Promise<Product> {
-    return this.get<Product>(API_ENDPOINTS.PRODUCTS.BY_ID(slug));
-  }
-
   async getProductById(id: string): Promise<Product> {
     return this.get<Product>(API_ENDPOINTS.PRODUCTS.BY_ID(id));
   }

@@ -8,7 +8,8 @@ import { ProfileMenu } from "@/components/profile/ProfileMenu";
 import { WishlistItem } from "@/features/wishlist/components/WishlistItem";
 import { wishlistService } from "@/features/wishlist/services/wishlist.service";
 import { useCartWishlist } from "@/contexts/CartWishlistContext";
-import type { WishlistItem as WishlistItemType } from "@/features/wishlist/types";
+import type { UIWishlistItem } from "@/features/wishlist/adapters/wishlist.adapter";
+import { adaptWishlistResponseToUI } from "@/features/wishlist/adapters/wishlist.adapter";
 import { toast } from "@/lib/toast";
 
 export default function WishlistPage() {
@@ -16,7 +17,7 @@ export default function WishlistPage() {
   const { refreshCounts, incrementCartCount, decrementWishlistCount } = useCartWishlist();
   const [isAuth, setIsAuth] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [wishlistItems, setWishlistItems] = useState<WishlistItemType[]>([]);
+  const [wishlistItems, setWishlistItems] = useState<UIWishlistItem[]>([]);
   const [isFetching, setIsFetching] = useState(false);
 
   useEffect(() => {
@@ -37,7 +38,8 @@ export default function WishlistPage() {
     setIsFetching(true);
     try {
       const response = await wishlistService.getWishlist();
-      setWishlistItems(response.items || []);
+      const adaptedItems = adaptWishlistResponseToUI(response.items || []);
+      setWishlistItems(adaptedItems);
     } catch (error) {
       console.error("Error fetching wishlist:", error);
       setWishlistItems([]);
@@ -127,7 +129,7 @@ export default function WishlistPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                   {wishlistItems.map((item) => (
                     <WishlistItem
-                      key={item._id}
+                      key={item._id || `${item.product._id}-${item.variantId}`}
                       item={item}
                       onRemove={handleRemove}
                       onAddToCart={handleAddToCart}

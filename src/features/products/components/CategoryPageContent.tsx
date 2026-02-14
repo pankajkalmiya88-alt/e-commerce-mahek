@@ -4,15 +4,18 @@ import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ProductFilters } from "./ProductFilters";
 import { productService } from "../services/product.service";
+import { wishlistService } from "@/features/wishlist/services/wishlist.service";
 import { expandProductVariants } from "../utils/variant-expander";
 import { adaptExpandedVariantToUI } from "../utils/variant-product-adapter";
 import { ProductCard } from "@/components/product/ProductCard";
+import { isAuthenticated } from "@/lib/auth-utils";
 import type {
   Product,
   ProductsListParams,
   ProductsListResponse,
 } from "../types";
 import type { ExpandedVariantProduct } from "../utils/variant-expander";
+import type { WishlistItem } from "@/features/wishlist/types";
 
 interface CategoryPageContentProps {
   categorySlug: string;
@@ -33,6 +36,7 @@ export function CategoryPageContent({
   const [totalProducts, setTotalProducts] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [isInitialized, setIsInitialized] = useState(false);
+  const [wishlistItems, setWishlistItems] = useState<WishlistItem[]>([]);
   
   // Initialize filters from URL query params
   const getInitialFilters = (): ProductsListParams => {
@@ -71,10 +75,11 @@ export function CategoryPageContent({
 
   const [filters, setFilters] = useState<ProductsListParams>(getInitialFilters);
 
-  // Initialize filters from URL on mount
+  // Initialize filters from URL on mount and fetch wishlist
   useEffect(() => {
     setFilters(getInitialFilters());
     setIsInitialized(true);
+    fetchWishlist();
   }, []);
 
   // Fetch products when filters or category changes
@@ -123,6 +128,19 @@ export function CategoryPageContent({
     router.replace(newUrl, { scroll: false });
   }, [filters, isInitialized, router]);
 
+  const fetchWishlist = async () => {
+    if (!isAuthenticated()) {
+      return;
+    }
+    
+    try {
+      const response = await wishlistService.getWishlist();
+      setWishlistItems(response.items);
+    } catch (error) {
+      console.error("Error fetching wishlist:", error);
+    }
+  };
+
   const fetchProducts = async () => {
     setLoading(true);
     try {
@@ -146,6 +164,15 @@ export function CategoryPageContent({
     } finally {
       setLoading(false);
     }
+  };
+
+  const isProductInWishlist = (productId: string, variantId: string, size: string): boolean => {
+    return wishlistItems.some(
+      (item) =>
+        item.product._id === productId &&
+        item.variantId === variantId &&
+        item.size === size
+    );
   };
 
   const handleFilterChange = (newFilters: ProductsListParams) => {
@@ -206,13 +233,24 @@ export function CategoryPageContent({
               <>
                 {/* Products Grid - Variant-wise display */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                  {expandedVariants.map((expandedVariant) => (
-                    <ProductCard
-                      key={`${expandedVariant._id}-${expandedVariant.selectedVariantId}`}
-                      product={adaptExpandedVariantToUI(expandedVariant)}
-                      apiProduct={expandedVariant}
-                    />
-                  ))}
+                  {expandedVariants.map((expandedVariant) => {
+                    const firstSize = expandedVariant.selectedVariant.sizes[0]?.size || "ONE_SIZE";
+                    const isInWishlist = isProductInWishlist(
+                      expandedVariant._id,
+                      expandedVariant.selectedVariantId,
+                      firstSize
+                    );
+                    
+                    return (
+                      <ProductCard
+                        key={`${expandedVariant._id}-${expandedVariant.selectedVariantId}`}
+                        product={adaptExpandedVariantToUI(expandedVariant)}
+                        apiProduct={expandedVariant}
+                        initialWishlistState={isInWishlist}
+                        onWishlistChange={fetchWishlist}
+                      />
+                    );
+                  })}
                 </div>
 
                 {/* Pagination */}

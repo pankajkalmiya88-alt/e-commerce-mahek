@@ -35,6 +35,7 @@ export interface CartItem {
   size: string;
   quantity: number;
   price: number;
+  images?: string[];
 }
 
 export interface CartListResponse {

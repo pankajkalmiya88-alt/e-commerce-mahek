@@ -17,18 +17,9 @@ export interface WishlistProduct {
   _id: string;
   name: string;
   slug: string;
-  brand: string;
   category: string;
-  subCategory: string;
-  pattern: string;
-  sleeveType: string;
-  fabric: string;
-  neckType: string;
-  description: string;
   isActive: boolean;
   isFeatured: boolean;
-  avgPrice: number;
-  totalStock: number;
   allImages: string[];
   allColors: string[];
   allSizes: string[];
@@ -38,19 +29,14 @@ export interface WishlistProduct {
   reviews: any[];
   createdAt: string;
   updatedAt: string;
-  price: number;
-  oldPrice?: number;
-  discountPercent: number;
-  availability: "IN_STOCK" | "OUT_OF_STOCK" | "LOW_STOCK";
-  images: string[];
 }
 
 export interface WishlistItem {
-  _id: string;
+  _id?: string;
   product: WishlistProduct;
   variantId: string;
   size: string;
-  addedAt: string;
+  addedAt?: string;
 }
 
 export interface WishlistResponse {

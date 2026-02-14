@@ -63,6 +63,30 @@ class ProductService {
       throw error;
     }
   }
+
+  async getBestSellingProducts(): Promise<ProductsListResponse> {
+    try {
+      const response = await apiClient.get<ProductsListResponse>(
+        `${BASE_URL}products/best-selling-temp`,
+      );
+      return response;
+    } catch (error) {
+      console.error("Error fetching best-selling products:", error);
+      throw error;
+    }
+  }
+
+  async getTrendingProducts(): Promise<ProductsListResponse> {
+    try {
+      const response = await apiClient.get<ProductsListResponse>(
+        `${BASE_URL}products/tending-temp`,
+      );
+      return response;
+    } catch (error) {
+      console.error("Error fetching trending products:", error);
+      throw error;
+    }
+  }
 }
 
 export const productService = new ProductService();

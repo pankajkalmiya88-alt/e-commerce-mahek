@@ -30,6 +30,11 @@ export interface CartItem {
   quantity: number;
 }
 
+export interface CartListResponse {
+  items: CartItem[];
+  total: number;
+}
+
 class CartService {
   private readonly CART_STORAGE_KEY = "mahek_cart";
 
@@ -56,6 +61,27 @@ class CartService {
       await apiClient.post(`${BASE_URL}cart/remove`, data);
     } catch (error) {
       console.error("Error removing from cart:", error);
+      throw error;
+    }
+  }
+
+  async getCartList(): Promise<CartListResponse> {
+    try {
+      const response = await apiClient.get<CartListResponse>(
+        `${BASE_URL}cart/list`,
+      );
+      return response;
+    } catch (error) {
+      console.error("Error fetching cart list:", error);
+      throw error;
+    }
+  }
+
+  async clearCart(): Promise<void> {
+    try {
+      await apiClient.delete(`${BASE_URL}cart/clear`);
+    } catch (error) {
+      console.error("Error clearing cart:", error);
       throw error;
     }
   }

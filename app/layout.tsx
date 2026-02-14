@@ -11,6 +11,11 @@ import "./globals.css";
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_CONFIG.url),
   ...generateSEO(),
+  icons: {
+    icon: "/images/mahek_sarees_logo.svg",
+    shortcut: "/images/mahek_sarees_logo.svg",
+    apple: "/images/mahek_sarees_logo.svg",
+  },
 };
 
 export default function RootLayout({

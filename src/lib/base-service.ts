@@ -50,9 +50,12 @@ export class BaseService {
     );
   }
 
-  protected async delete<T>(endpoint: string): Promise<T> {
+  protected async delete<T>(endpoint: string, data?: any): Promise<T> {
     return this.handleRequest(`DELETE ${endpoint}`, () =>
-      apiClient.delete<T>(endpoint),
+      apiClient.delete<T>(
+        endpoint,
+        data ? { body: JSON.stringify(data) } : undefined,
+      ),
     );
   }
 }

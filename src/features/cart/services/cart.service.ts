@@ -21,16 +21,24 @@ export interface RemoveFromCartRequest {
   size: string;
 }
 
+export interface CartItemProduct {
+  _id: string;
+  name: string;
+  slug: string;
+  allImages: string[];
+}
+
 export interface CartItem {
-  productId: string;
+  product: CartItemProduct;
   variantId: string;
+  color: string;
   size: string;
   quantity: number;
+  price: number;
 }
 
 export interface CartListResponse {
   items: CartItem[];
-  total: number;
 }
 
 class CartService extends BaseService {
@@ -41,11 +49,11 @@ class CartService extends BaseService {
   }
 
   async updateCart(data: UpdateCartRequest): Promise<void> {
-    return this.post<void>(API_ENDPOINTS.CART.UPDATE, data);
+    return this.put<void>(API_ENDPOINTS.CART.UPDATE, data);
   }
 
   async removeFromCart(data: RemoveFromCartRequest): Promise<void> {
-    return this.post<void>(API_ENDPOINTS.CART.REMOVE, data);
+    return this.delete<void>(API_ENDPOINTS.CART.REMOVE, data);
   }
 
   async getCartList(): Promise<CartListResponse> {
@@ -56,17 +64,12 @@ class CartService extends BaseService {
     return this.delete<void>(API_ENDPOINTS.CART.CLEAR);
   }
 
-  getCartCount(): number {
+  async getCartCount(): Promise<number> {
     try {
-      if (typeof window === "undefined") return 0;
-
-      const cartData = localStorage.getItem(this.CART_STORAGE_KEY);
-      if (!cartData) return 0;
-
-      const cart: CartItem[] = JSON.parse(cartData);
-      return cart.reduce((total, item) => total + item.quantity, 0);
+      const response = await this.getCartList();
+      return response.items.reduce((total, item) => total + item.quantity, 0);
     } catch (error) {
-      console.error("Error calculating cart count:", error);
+      console.error("Error fetching cart count:", error);
       return 0;
     }
   }

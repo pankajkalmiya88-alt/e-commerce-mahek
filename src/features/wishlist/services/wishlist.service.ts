@@ -18,7 +18,7 @@ class WishlistService extends BaseService {
   }
 
   async removeFromWishlist(productId: string): Promise<void> {
-    return this.delete<void>(API_ENDPOINTS.WISHLIST.REMOVE(productId));
+    return this.delete<void>(API_ENDPOINTS.WISHLIST.REMOVE, { productId });
   }
 
   async moveToCart(data: MoveToCartRequest): Promise<void> {

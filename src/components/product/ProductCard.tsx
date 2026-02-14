@@ -16,9 +16,10 @@ interface ProductCardProps {
   product: Product;
   className?: string;
   variant?: 'default' | 'compact';
+  apiProduct?: any; // Original API product with variants
 }
 
-export const ProductCard = ({ product, className, variant = 'default' }: ProductCardProps) => {
+export const ProductCard = ({ product, className, variant = 'default', apiProduct }: ProductCardProps) => {
   const router = useRouter();
   const productUrl = ROUTES.PRODUCT_DETAIL(product.id);
   const isCompact = variant === 'compact';
@@ -59,6 +60,12 @@ export const ProductCard = ({ product, className, variant = 'default' }: Product
       return;
     }
 
+    // If no API product data, redirect to detail page
+    if (!apiProduct || !apiProduct.variants || apiProduct.variants.length === 0) {
+      router.push(productUrl);
+      return;
+    }
+
     setIsAddingToWishlist(true);
     try {
       if (isInWishlist) {
@@ -66,7 +73,22 @@ export const ProductCard = ({ product, className, variant = 'default' }: Product
         setIsInWishlist(false);
         decrementWishlistCount();
       } else {
-        await wishlistService.addToWishlist({ productId: product.id });
+        // Use first variant and first available size
+        const firstVariant = apiProduct.variants[0];
+        
+        // Filter out null/undefined sizes and get first valid size
+        const validSizes = (firstVariant.sizes || []).filter(
+          (s: any) => s !== null && s !== undefined && s.size
+        );
+        const firstSize = validSizes.length > 0 
+          ? validSizes[0].size 
+          : "ONE_SIZE";
+        
+        await wishlistService.addToWishlist({
+          productId: product.id,
+          variantId: firstVariant.variantId,
+          size: firstSize,
+        });
         setIsInWishlist(true);
         incrementWishlistCount();
       }
@@ -86,16 +108,29 @@ export const ProductCard = ({ product, className, variant = 'default' }: Product
       return;
     }
 
+    // If no API product data, redirect to detail page
+    if (!apiProduct || !apiProduct.variants || apiProduct.variants.length === 0) {
+      router.push(productUrl);
+      return;
+    }
+
     setIsAddingToCart(true);
     try {
-      const defaultSize = product.sizes && product.sizes.length > 0 
-        ? product.sizes[0].name 
-        : "FREE";
+      // Use first variant and first available size
+      const firstVariant = apiProduct.variants[0];
+      
+      // Filter out null/undefined sizes and get first valid size
+      const validSizes = (firstVariant.sizes || []).filter(
+        (s: any) => s !== null && s !== undefined && s.size
+      );
+      const firstSize = validSizes.length > 0 
+        ? validSizes[0].size 
+        : "ONE_SIZE";
       
       await cartService.addToCart({
         productId: product.id,
-        variantId: `${product.id}_variant_1`,
-        size: defaultSize,
+        variantId: firstVariant.variantId,
+        size: firstSize,
         quantity: 1,
       });
       incrementCartCount();

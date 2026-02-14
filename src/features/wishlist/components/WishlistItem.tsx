@@ -61,9 +61,7 @@ export function WishlistItem({ item, onRemove, onAddToCart }: WishlistItemProps)
       </button>
 
       <Link
-        href={`/category/${item.product.category}`}
-        target="_blank"
-        rel="noopener noreferrer"
+        href={`/product/${item.product._id}`}
         className="block"
       >
         <div className="relative aspect-[3/4] w-full">
@@ -73,7 +71,7 @@ export function WishlistItem({ item, onRemove, onAddToCart }: WishlistItemProps)
             </div>
           )}
           <Image
-            src={item.product.images[0] || "/placeholder.jpg"}
+            src={(item.product.images && item.product.images[0]) || (item.product.allImages && item.product.allImages[0]) || "/placeholder.jpg"}
             alt={item.product.name}
             fill
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
@@ -84,9 +82,7 @@ export function WishlistItem({ item, onRemove, onAddToCart }: WishlistItemProps)
 
       <div className="p-4">
         <Link
-          href={`/category/${item.product.category}`}
-          target="_blank"
-          rel="noopener noreferrer"
+          href={`/product/${item.product._id}`}
         >
           <h3 className="text-sm font-medium text-gray-900 mb-2 font-playfair hover:text-gray-700 transition-colors line-clamp-2 min-h-[2.5rem]">
             {item.product.name}
@@ -114,9 +110,9 @@ export function WishlistItem({ item, onRemove, onAddToCart }: WishlistItemProps)
 
         <div className="flex items-center gap-2 mb-3">
           <span className="text-lg font-bold text-gray-900 font-poppins">
-            ₹{item.product.price.toLocaleString()}
+            ₹{(item.product.price || item.product.avgPrice || 0).toLocaleString()}
           </span>
-          {item.product.oldPrice && (
+          {item.product.oldPrice && item.product.oldPrice > (item.product.price || item.product.avgPrice || 0) && (
             <>
               <span className="text-sm text-gray-400 line-through font-poppins">
                 ₹{item.product.oldPrice.toLocaleString()}
@@ -130,14 +126,14 @@ export function WishlistItem({ item, onRemove, onAddToCart }: WishlistItemProps)
 
         <button
           onClick={handleAddToCart}
-          disabled={isAddingToCart || item.product.availability === "OUT_OF_STOCK"}
+          disabled={isAddingToCart || item.product.availability === "OUT_OF_STOCK" || item.product.totalStock === 0}
           className="w-full bg-primary text-white px-4 py-2.5 text-sm font-semibold rounded hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-poppins"
         >
           {isAddingToCart
             ? "Adding..."
-            : item.product.availability === "OUT_OF_STOCK"
+            : (item.product.availability === "OUT_OF_STOCK" || item.product.totalStock === 0)
             ? "Out of Stock"
-            : "Add to Cart"}
+            : "Move to Cart"}
         </button>
       </div>
     </div>

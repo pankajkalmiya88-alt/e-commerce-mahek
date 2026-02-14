@@ -1,15 +1,18 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { ProductFilters } from "./ProductFilters";
 import { productService } from "../services/product.service";
-import { adaptAPIProductToUI } from "../utils/product-adapter";
+import { expandProductVariants } from "../utils/variant-expander";
+import { adaptExpandedVariantToUI } from "../utils/variant-product-adapter";
 import { ProductCard } from "@/components/product/ProductCard";
 import type {
   Product,
   ProductsListParams,
   ProductsListResponse,
 } from "../types";
+import type { ExpandedVariantProduct } from "../utils/variant-expander";
 
 interface CategoryPageContentProps {
   categorySlug: string;
@@ -22,18 +25,103 @@ export function CategoryPageContent({
   categoryName,
   categoryType,
 }: CategoryPageContentProps) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [products, setProducts] = useState<Product[]>([]);
+  const [expandedVariants, setExpandedVariants] = useState<ExpandedVariantProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [totalProducts, setTotalProducts] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
-  const [filters, setFilters] = useState<ProductsListParams>({
-    limit: 10,
-    page: 1,
-  });
+  const [isInitialized, setIsInitialized] = useState(false);
+  
+  // Initialize filters from URL query params
+  const getInitialFilters = (): ProductsListParams => {
+    const params: ProductsListParams = {
+      limit: 10,
+      page: 1,
+    };
 
+    if (searchParams.get('page')) {
+      params.page = parseInt(searchParams.get('page')!);
+    }
+    if (searchParams.get('limit')) {
+      params.limit = parseInt(searchParams.get('limit')!);
+    }
+    if (searchParams.get('sort')) {
+      params.sort = searchParams.get('sort') as any;
+    }
+    if (searchParams.get('minPrice')) {
+      params.minPrice = parseInt(searchParams.get('minPrice')!);
+    }
+    if (searchParams.get('maxPrice')) {
+      params.maxPrice = parseInt(searchParams.get('maxPrice')!);
+    }
+    if (searchParams.get('color')) {
+      params.color = searchParams.get('color')!;
+    }
+    if (searchParams.get('size')) {
+      params.size = searchParams.get('size')!;
+    }
+    if (searchParams.get('availability')) {
+      params.availability = searchParams.get('availability') as any;
+    }
+
+    return params;
+  };
+
+  const [filters, setFilters] = useState<ProductsListParams>(getInitialFilters);
+
+  // Initialize filters from URL on mount
   useEffect(() => {
-    fetchProducts();
-  }, [filters, categoryType]);
+    setFilters(getInitialFilters());
+    setIsInitialized(true);
+  }, []);
+
+  // Fetch products when filters or category changes
+  useEffect(() => {
+    if (isInitialized) {
+      fetchProducts();
+    }
+  }, [filters, categoryType, isInitialized]);
+
+  // Sync filters to URL query params
+  useEffect(() => {
+    if (!isInitialized) return;
+
+    const params = new URLSearchParams();
+
+    if (filters.page && filters.page !== 1) {
+      params.set('page', filters.page.toString());
+    }
+    if (filters.limit && filters.limit !== 10) {
+      params.set('limit', filters.limit.toString());
+    }
+    if (filters.sort) {
+      params.set('sort', filters.sort);
+    }
+    if (filters.minPrice) {
+      params.set('minPrice', filters.minPrice.toString());
+    }
+    if (filters.maxPrice) {
+      params.set('maxPrice', filters.maxPrice.toString());
+    }
+    if (filters.color) {
+      params.set('color', filters.color);
+    }
+    if (filters.size) {
+      params.set('size', filters.size);
+    }
+    if (filters.availability) {
+      params.set('availability', filters.availability);
+    }
+
+    const queryString = params.toString();
+    const newUrl = queryString 
+      ? `${window.location.pathname}?${queryString}`
+      : window.location.pathname;
+    
+    router.replace(newUrl, { scroll: false });
+  }, [filters, isInitialized, router]);
 
   const fetchProducts = async () => {
     setLoading(true);
@@ -43,8 +131,15 @@ export function CategoryPageContent({
           ...filters,
           type: categoryType,
         });
+      
+      // Expand products into variants (each variant becomes a separate card)
+      const allExpandedVariants = response.products.flatMap((product) =>
+        expandProductVariants(product)
+      );
+      
       setProducts(response.products);
-      setTotalProducts(response.total);
+      setExpandedVariants(allExpandedVariants);
+      setTotalProducts(allExpandedVariants.length);
       setCurrentPage(response.page);
     } catch (error) {
       console.error("Error fetching products:", error);
@@ -61,10 +156,10 @@ export function CategoryPageContent({
     setFilters({ ...filters, page });
   };
 
-  const colorCounts = products.reduce((acc, product) => {
-    product.allColors.forEach((color) => {
-      acc[color] = (acc[color] || 0) + 1;
-    });
+  // Calculate color counts from expanded variants (each variant = 1 color)
+  const colorCounts = expandedVariants.reduce((acc, variant) => {
+    const color = variant.selectedVariant.color;
+    acc[color] = (acc[color] || 0) + 1;
     return acc;
   }, {} as Record<string, number>);
 
@@ -73,22 +168,13 @@ export function CategoryPageContent({
     count,
   }));
 
-  const availableSizes = Array.from(new Set(products.flatMap((p) => p.allSizes)));
+  // Calculate available sizes from expanded variants
+  const availableSizes = Array.from(
+    new Set(expandedVariants.flatMap((v) => v.selectedVariant.sizes.map(s => s.size)))
+  );
 
   return (
     <div className="min-h-screen bg-background-light">
-      {/* Hero Section */}
-      <div className="bg-primary text-white py-12">
-        <div className="container-fluid">
-          <h1 className="text-4xl font-playfair font-bold text-center">
-            {categoryName}
-          </h1>
-          <p className="text-center mt-2 font-poppins">
-            {totalProducts} items
-          </p>
-        </div>
-      </div>
-
       {/* Main Content */}
       <div className="container-fluid py-8">
         <div className="flex flex-col lg:flex-row gap-8">
@@ -99,6 +185,7 @@ export function CategoryPageContent({
                 onFilterChange={handleFilterChange}
                 availableColors={availableColors}
                 availableSizes={availableSizes}
+                initialFilters={filters}
               />
             </div>
           </aside>
@@ -117,12 +204,13 @@ export function CategoryPageContent({
               </div>
             ) : (
               <>
-                {/* Products Grid */}
+                {/* Products Grid - Variant-wise display */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                  {products.map((product) => (
+                  {expandedVariants.map((expandedVariant) => (
                     <ProductCard
-                      key={product._id}
-                      product={adaptAPIProductToUI(product)}
+                      key={`${expandedVariant._id}-${expandedVariant.selectedVariantId}`}
+                      product={adaptExpandedVariantToUI(expandedVariant)}
+                      apiProduct={expandedVariant}
                     />
                   ))}
                 </div>

@@ -13,7 +13,7 @@ export const API_ENDPOINTS = {
   WISHLIST: {
     LIST: "wishlist/list",
     ADD: "wishlist/add",
-    REMOVE: (productId: string) => `wishlist/remove/${productId}`,
+    REMOVE: "wishlist/remove",
     MOVE_TO_CART: "wishlist/move-to-cart",
     BULK_MOVE_TO_CART: "wishlist/bulk-move-to-cart",
   },

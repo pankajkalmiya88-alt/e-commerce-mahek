@@ -6,6 +6,7 @@ import { TopBar } from "@/components/layout/TopBar";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { CartWishlistProvider } from "@/contexts/CartWishlistContext";
+import { Toaster } from "sonner";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -27,6 +28,7 @@ export default function RootLayout({
     <html lang="en" className={`${playfair.variable} ${inter.variable} ${poppins.variable}`}>
       <body className="min-h-screen flex flex-col" suppressHydrationWarning>
         <CartWishlistProvider>
+          <Toaster position="top-right" richColors closeButton />
           <TopBar />
           <Header />
           <main className="flex-1">{children}</main>

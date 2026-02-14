@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { CATEGORIES } from "@/constants/categories";
 import { CATEGORY_TYPE_MAP } from "@/features/products/types";
@@ -25,10 +26,18 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
   }
 
   return (
-    <CategoryPageContent
-      categorySlug={slug}
-      categoryName={category.name}
-      categoryType={categoryType}
-    />
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-background-light">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        </div>
+      }
+    >
+      <CategoryPageContent
+        categorySlug={slug}
+        categoryName={category.name}
+        categoryType={categoryType}
+      />
+    </Suspense>
   );
 }

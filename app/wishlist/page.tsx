@@ -7,11 +7,13 @@ import { EmptyWishlist } from "@/components/empty-states/EmptyWishlist";
 import { ProfileMenu } from "@/components/profile/ProfileMenu";
 import { WishlistItem } from "@/features/wishlist/components/WishlistItem";
 import { wishlistService } from "@/features/wishlist/services/wishlist.service";
-import { cartService } from "@/features/cart/services/cart.service";
+import { useCartWishlist } from "@/contexts/CartWishlistContext";
 import type { WishlistItem as WishlistItemType } from "@/features/wishlist/types";
+import { toast } from "@/lib/toast";
 
 export default function WishlistPage() {
   const router = useRouter();
+  const { refreshCounts, incrementCartCount, decrementWishlistCount } = useCartWishlist();
   const [isAuth, setIsAuth] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [wishlistItems, setWishlistItems] = useState<WishlistItemType[]>([]);
@@ -50,26 +52,39 @@ export default function WishlistPage() {
       setWishlistItems((prev) =>
         prev.filter((item) => item.product._id !== productId)
       );
+      decrementWishlistCount();
+      toast.success("Removed from wishlist");
     } catch (error) {
       console.error("Error removing from wishlist:", error);
+      toast.error("Failed to remove from wishlist");
       throw error;
     }
   };
 
   const handleAddToCart = async (productId: string) => {
     try {
-      await cartService.addToCart({
-        productId,
-        variantId: `${productId}_variant_1`,
-        size: "FREE",
-        quantity: 1,
+      const wishlistItem = wishlistItems.find((item) => item.product._id === productId);
+      if (!wishlistItem) {
+        toast.error("Item not found in wishlist");
+        return;
+      }
+
+      await wishlistService.moveToCart({
+        productId: wishlistItem.product._id,
+        variantId: wishlistItem.variantId,
+        size: wishlistItem.size,
       });
-      await wishlistService.removeFromWishlist(productId);
+      
       setWishlistItems((prev) =>
         prev.filter((item) => item.product._id !== productId)
       );
+      
+      incrementCartCount();
+      decrementWishlistCount();
+      toast.success("Moved to cart successfully");
     } catch (error) {
-      console.error("Error adding to cart:", error);
+      console.error("Error moving to cart:", error);
+      toast.error("Failed to move to cart");
       throw error;
     }
   };

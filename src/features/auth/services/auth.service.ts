@@ -1,4 +1,5 @@
 import apiClient from "@/lib/api-client";
+import { API_CONFIG, API_ENDPOINTS } from "@/lib/api-config";
 import type {
   SendOtpRequest,
   SendOtpResponse,
@@ -7,22 +8,27 @@ import type {
   UserData,
 } from "../types";
 
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || "https://api-dev.maheksarees.in/api/";
+const STORAGE_KEYS = {
+  AUTH_TOKEN: "authToken",
+  USER_DATA: "userData",
+} as const;
 
-export const authService = {
+class AuthService {
   async sendOtp(data: SendOtpRequest): Promise<SendOtpResponse> {
-    return apiClient.post<SendOtpResponse>("auth/send-otp", data);
-  },
+    return apiClient.post<SendOtpResponse>(API_ENDPOINTS.AUTH.SEND_OTP, data);
+  }
 
   async verifyOtp(data: VerifyOtpRequest): Promise<VerifyOtpResponse> {
-    const response = await fetch(`${API_BASE_URL}auth/verify-otp`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
+    const response = await fetch(
+      `${API_CONFIG.BASE_URL}${API_ENDPOINTS.AUTH.VERIFY_OTP}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
       },
-      body: JSON.stringify(data),
-    });
+    );
 
     if (!response.ok) {
       const error = await response
@@ -31,65 +37,82 @@ export const authService = {
       throw new Error(error.message || "Failed to verify OTP");
     }
 
+    const result = await response.json();
+
+    this.handleAuthToken(response, result);
+    this.handleUserData(result);
+
+    return result;
+  }
+
+  private handleAuthToken(response: Response, result: VerifyOtpResponse): void {
     const authHeader = response.headers.get("Authorization");
+
     if (authHeader) {
       const token = authHeader.startsWith("Bearer ")
         ? authHeader.substring(7)
         : authHeader;
       this.setAuthToken(token);
-    }
-
-    const result = await response.json();
-
-    if (result.token && !authHeader) {
+    } else if (result.token) {
       this.setAuthToken(result.token);
     }
+  }
 
-    if (result.user || result.id) {
-      const userData: UserData = result.user || {
-        id: result.id,
-        email: result.email,
-        name: result.name,
-        role: result.role,
-        addresses: result.addresses || [],
-      };
-      this.setUserData(userData);
+  private handleUserData(result: VerifyOtpResponse): void {
+    if (result.user) {
+      this.setUserData(result.user);
+    } else {
+      const resultData = result as any;
+      if (resultData.id) {
+        const userData: UserData = {
+          id: resultData.id,
+          email: resultData.email,
+          name: resultData.name,
+          role: resultData.role,
+          addresses: resultData.addresses || [],
+        };
+        this.setUserData(userData);
+      }
     }
+  }
 
-    return result;
-  },
+  private isClient(): boolean {
+    return typeof window !== "undefined";
+  }
 
   setAuthToken(token: string): void {
-    if (typeof window !== "undefined") {
-      localStorage.setItem("authToken", token);
+    if (this.isClient()) {
+      localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, token);
     }
-  },
+  }
 
   getAuthToken(): string | null {
-    if (typeof window !== "undefined") {
-      return localStorage.getItem("authToken");
+    if (this.isClient()) {
+      return localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
     }
     return null;
-  },
+  }
 
   setUserData(userData: UserData): void {
-    if (typeof window !== "undefined") {
-      localStorage.setItem("userData", JSON.stringify(userData));
+    if (this.isClient()) {
+      localStorage.setItem(STORAGE_KEYS.USER_DATA, JSON.stringify(userData));
     }
-  },
+  }
 
   getUserData(): UserData | null {
-    if (typeof window !== "undefined") {
-      const data = localStorage.getItem("userData");
+    if (this.isClient()) {
+      const data = localStorage.getItem(STORAGE_KEYS.USER_DATA);
       return data ? JSON.parse(data) : null;
     }
     return null;
-  },
+  }
 
   clearAuth(): void {
-    if (typeof window !== "undefined") {
-      localStorage.removeItem("authToken");
-      localStorage.removeItem("userData");
+    if (this.isClient()) {
+      localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
+      localStorage.removeItem(STORAGE_KEYS.USER_DATA);
     }
-  },
-};
+  }
+}
+
+export const authService = new AuthService();

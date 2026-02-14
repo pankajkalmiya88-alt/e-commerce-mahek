@@ -61,7 +61,7 @@ export function WishlistItem({ item, onRemove, onAddToCart }: WishlistItemProps)
       </button>
 
       <Link
-        href={`/product/${item.product.slug}`}
+        href={`/category/${item.product.category}`}
         target="_blank"
         rel="noopener noreferrer"
         className="block"
@@ -84,7 +84,7 @@ export function WishlistItem({ item, onRemove, onAddToCart }: WishlistItemProps)
 
       <div className="p-4">
         <Link
-          href={`/product/${item.product.slug}`}
+          href={`/category/${item.product.category}`}
           target="_blank"
           rel="noopener noreferrer"
         >

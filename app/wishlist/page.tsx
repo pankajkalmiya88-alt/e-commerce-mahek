@@ -7,6 +7,7 @@ import { EmptyWishlist } from "@/components/empty-states/EmptyWishlist";
 import { ProfileMenu } from "@/components/profile/ProfileMenu";
 import { WishlistItem } from "@/features/wishlist/components/WishlistItem";
 import { wishlistService } from "@/features/wishlist/services/wishlist.service";
+import { cartService } from "@/features/cart/services/cart.service";
 import type { WishlistItem as WishlistItemType } from "@/features/wishlist/types";
 
 export default function WishlistPage() {
@@ -57,7 +58,12 @@ export default function WishlistPage() {
 
   const handleAddToCart = async (productId: string) => {
     try {
-      await wishlistService.addToCart({ productId, quantity: 1 });
+      await cartService.addToCart({
+        productId,
+        variantId: `${productId}_variant_1`,
+        size: "FREE",
+        quantity: 1,
+      });
       await wishlistService.removeFromWishlist(productId);
       setWishlistItems((prev) =>
         prev.filter((item) => item.product._id !== productId)

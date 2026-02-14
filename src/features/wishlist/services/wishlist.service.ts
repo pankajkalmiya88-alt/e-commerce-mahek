@@ -1,4 +1,5 @@
-import apiClient from "@/lib/api-client";
+import { BaseService } from "@/lib/base-service";
+import { API_ENDPOINTS } from "@/lib/api-config";
 import type {
   WishlistResponse,
   AddToWishlistRequest,
@@ -7,56 +8,25 @@ import type {
   AddToCartRequest,
 } from "../types";
 
-const BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || "https://api-dev.maheksarees.in/api/";
-
-class WishlistService {
+class WishlistService extends BaseService {
   async getWishlist(): Promise<WishlistResponse> {
-    try {
-      const response = await apiClient.get<WishlistResponse>(
-        `${BASE_URL}wishlist/list`,
-      );
-      return response;
-    } catch (error) {
-      console.error("Error fetching wishlist:", error);
-      throw error;
-    }
+    return this.get<WishlistResponse>(API_ENDPOINTS.WISHLIST.LIST);
   }
 
   async addToWishlist(data: AddToWishlistRequest): Promise<void> {
-    try {
-      await apiClient.post(`${BASE_URL}wishlist/add`, data);
-    } catch (error) {
-      console.error("Error adding to wishlist:", error);
-      throw error;
-    }
+    return this.post<void>(API_ENDPOINTS.WISHLIST.ADD, data);
   }
 
   async removeFromWishlist(productId: string): Promise<void> {
-    try {
-      await apiClient.delete(`${BASE_URL}wishlist/remove/${productId}`);
-    } catch (error) {
-      console.error("Error removing from wishlist:", error);
-      throw error;
-    }
+    return this.delete<void>(API_ENDPOINTS.WISHLIST.REMOVE(productId));
   }
 
   async moveToCart(data: MoveToCartRequest): Promise<void> {
-    try {
-      await apiClient.post(`${BASE_URL}wishlist/move-to-cart`, data);
-    } catch (error) {
-      console.error("Error moving to cart:", error);
-      throw error;
-    }
+    return this.post<void>(API_ENDPOINTS.WISHLIST.MOVE_TO_CART, data);
   }
 
   async bulkMoveToCart(data: BulkMoveToCartRequest): Promise<void> {
-    try {
-      await apiClient.post(`${BASE_URL}wishlist/bulk-move-to-cart`, data);
-    } catch (error) {
-      console.error("Error bulk moving to cart:", error);
-      throw error;
-    }
+    return this.post<void>(API_ENDPOINTS.WISHLIST.BULK_MOVE_TO_CART, data);
   }
 
   async getWishlistCount(): Promise<number> {

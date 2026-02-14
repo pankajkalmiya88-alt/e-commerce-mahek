@@ -1,17 +1,10 @@
-import apiClient from "@/lib/api-client";
+import { BaseService } from "@/lib/base-service";
+import { API_ENDPOINTS } from "@/lib/api-config";
 import type { AddReviewRequest, UpdateReviewRequest } from "../types";
 
-const BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || "https://api-dev.maheksarees.in/api/";
-
-class ReviewService {
+class ReviewService extends BaseService {
   async addReview(productId: string, data: AddReviewRequest): Promise<void> {
-    try {
-      await apiClient.post(`${BASE_URL}products/${productId}/reviews`, data);
-    } catch (error) {
-      console.error("Error adding review:", error);
-      throw error;
-    }
+    return this.post<void>(API_ENDPOINTS.REVIEWS.ADD(productId), data);
   }
 
   async updateReview(
@@ -19,26 +12,14 @@ class ReviewService {
     reviewId: string,
     data: UpdateReviewRequest,
   ): Promise<void> {
-    try {
-      await apiClient.put(
-        `${BASE_URL}products/${productId}/reviews/${reviewId}`,
-        data,
-      );
-    } catch (error) {
-      console.error("Error updating review:", error);
-      throw error;
-    }
+    return this.put<void>(
+      API_ENDPOINTS.REVIEWS.UPDATE(productId, reviewId),
+      data,
+    );
   }
 
   async deleteReview(productId: string, reviewId: string): Promise<void> {
-    try {
-      await apiClient.delete(
-        `${BASE_URL}products/${productId}/reviews/${reviewId}`,
-      );
-    } catch (error) {
-      console.error("Error deleting review:", error);
-      throw error;
-    }
+    return this.delete<void>(API_ENDPOINTS.REVIEWS.DELETE(productId, reviewId));
   }
 }
 

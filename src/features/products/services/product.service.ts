@@ -1,17 +1,13 @@
-import apiClient from "@/lib/api-client";
+import { BaseService } from "@/lib/base-service";
+import { API_ENDPOINTS } from "@/lib/api-config";
 import type {
   Product,
   ProductsListResponse,
   ProductsListParams,
 } from "../types";
 
-const BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || "https://api-dev.maheksarees.in/api/";
-
-class ProductService {
-  async getProductsList(
-    params: ProductsListParams = {},
-  ): Promise<ProductsListResponse> {
+class ProductService extends BaseService {
+  private buildQueryString(params: ProductsListParams): string {
     const queryParams = new URLSearchParams();
 
     if (params.type) queryParams.append("type", params.type);
@@ -27,65 +23,32 @@ class ProductService {
       queryParams.append("availability", params.availability);
     if (params.page) queryParams.append("page", params.page.toString());
 
-    const url = `${BASE_URL}products/list${
-      queryParams.toString() ? `?${queryParams.toString()}` : ""
-    }`;
-
-    try {
-      const response = await apiClient.get<ProductsListResponse>(url);
-      return response;
-    } catch (error) {
-      console.error("Error fetching products:", error);
-      throw error;
-    }
+    const queryString = queryParams.toString();
+    return queryString ? `?${queryString}` : "";
+  }
+  async getProductsList(
+    params: ProductsListParams = {},
+  ): Promise<ProductsListResponse> {
+    const queryString = this.buildQueryString(params);
+    return this.get<ProductsListResponse>(
+      `${API_ENDPOINTS.PRODUCTS.LIST}${queryString}`,
+    );
   }
 
   async getProductBySlug(slug: string): Promise<Product> {
-    try {
-      const response = await apiClient.get<Product>(
-        `${BASE_URL}products/${slug}`,
-      );
-      return response;
-    } catch (error) {
-      console.error("Error fetching product:", error);
-      throw error;
-    }
+    return this.get<Product>(API_ENDPOINTS.PRODUCTS.BY_ID(slug));
   }
 
   async getProductById(id: string): Promise<Product> {
-    try {
-      const response = await apiClient.get<Product>(
-        `${BASE_URL}products/${id}`,
-      );
-      return response;
-    } catch (error) {
-      console.error("Error fetching product by ID:", error);
-      throw error;
-    }
+    return this.get<Product>(API_ENDPOINTS.PRODUCTS.BY_ID(id));
   }
 
   async getBestSellingProducts(): Promise<ProductsListResponse> {
-    try {
-      const response = await apiClient.get<ProductsListResponse>(
-        `${BASE_URL}products/best-selling-temp`,
-      );
-      return response;
-    } catch (error) {
-      console.error("Error fetching best-selling products:", error);
-      throw error;
-    }
+    return this.get<ProductsListResponse>(API_ENDPOINTS.PRODUCTS.BEST_SELLING);
   }
 
   async getTrendingProducts(): Promise<ProductsListResponse> {
-    try {
-      const response = await apiClient.get<ProductsListResponse>(
-        `${BASE_URL}products/tending-temp`,
-      );
-      return response;
-    } catch (error) {
-      console.error("Error fetching trending products:", error);
-      throw error;
-    }
+    return this.get<ProductsListResponse>(API_ENDPOINTS.PRODUCTS.TRENDING);
   }
 }
 

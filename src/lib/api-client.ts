@@ -22,9 +22,7 @@ class ApiClient {
 
   constructor(config: ApiClientConfig = {}) {
     this.baseURL =
-      config.baseURL ||
-      process.env.NEXT_PUBLIC_API_URL ||
-      "https://api-dev.maheksarees.in/api/";
+      config.baseURL || (process.env.NEXT_PUBLIC_API_URL as string);
     this.defaultHeaders = config.headers || {};
   }
 

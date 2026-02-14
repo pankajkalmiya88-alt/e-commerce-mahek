@@ -1,7 +1,5 @@
-import apiClient from "@/lib/api-client";
-
-const BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || "https://api-dev.maheksarees.in/api/";
+import { BaseService } from "@/lib/base-service";
+import { API_ENDPOINTS } from "@/lib/api-config";
 
 export interface AddToCartRequest {
   productId: string;
@@ -35,55 +33,27 @@ export interface CartListResponse {
   total: number;
 }
 
-class CartService {
+class CartService extends BaseService {
   private readonly CART_STORAGE_KEY = "mahek_cart";
 
   async addToCart(data: AddToCartRequest): Promise<void> {
-    try {
-      await apiClient.post(`${BASE_URL}cart/add`, data);
-    } catch (error) {
-      console.error("Error adding to cart:", error);
-      throw error;
-    }
+    return this.post<void>(API_ENDPOINTS.CART.ADD, data);
   }
 
   async updateCart(data: UpdateCartRequest): Promise<void> {
-    try {
-      await apiClient.post(`${BASE_URL}cart/update`, data);
-    } catch (error) {
-      console.error("Error updating cart:", error);
-      throw error;
-    }
+    return this.post<void>(API_ENDPOINTS.CART.UPDATE, data);
   }
 
   async removeFromCart(data: RemoveFromCartRequest): Promise<void> {
-    try {
-      await apiClient.post(`${BASE_URL}cart/remove`, data);
-    } catch (error) {
-      console.error("Error removing from cart:", error);
-      throw error;
-    }
+    return this.post<void>(API_ENDPOINTS.CART.REMOVE, data);
   }
 
   async getCartList(): Promise<CartListResponse> {
-    try {
-      const response = await apiClient.get<CartListResponse>(
-        `${BASE_URL}cart/list`,
-      );
-      return response;
-    } catch (error) {
-      console.error("Error fetching cart list:", error);
-      throw error;
-    }
+    return this.get<CartListResponse>(API_ENDPOINTS.CART.LIST);
   }
 
   async clearCart(): Promise<void> {
-    try {
-      await apiClient.delete(`${BASE_URL}cart/clear`);
-    } catch (error) {
-      console.error("Error clearing cart:", error);
-      throw error;
-    }
+    return this.delete<void>(API_ENDPOINTS.CART.CLEAR);
   }
 
   getCartCount(): number {

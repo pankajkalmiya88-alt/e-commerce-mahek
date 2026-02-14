@@ -26,7 +26,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${playfair.variable} ${inter.variable} ${poppins.variable}`}>
-      <body className="min-h-screen flex flex-col" suppressHydrationWarning>
+      <body className="min-h-screen flex flex-col">
         <CartWishlistProvider>
           <Toaster position="top-right" richColors closeButton />
           <TopBar />

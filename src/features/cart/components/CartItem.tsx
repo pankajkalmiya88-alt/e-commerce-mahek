@@ -17,7 +17,7 @@ export function CartItem({ item, onUpdateQuantity, onRemove }: CartItemProps) {
   const [isUpdating, setIsUpdating] = useState(false);
   const [isRemoving, setIsRemoving] = useState(false);
 
-  const productUrl = ROUTES.PRODUCT_DETAIL(item.product._id);
+  const productUrl = ROUTES.CATEGORY(item.product._id);
   const productImage = item.images?.[0] || item.product.allImages?.[0] || "/placeholder.jpg";
 
   const handleQuantityChange = async (newQuantity: number) => {

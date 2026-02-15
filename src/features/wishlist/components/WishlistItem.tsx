@@ -61,7 +61,7 @@ export function WishlistItem({ item, onRemove, onAddToCart }: WishlistItemProps)
       </button>
 
       <Link
-        href={`/product/${item.product._id}`}
+        href={`/category/sarees`}
         className="block"
       >
         <div className="relative aspect-[4/5] w-full">
@@ -82,7 +82,7 @@ export function WishlistItem({ item, onRemove, onAddToCart }: WishlistItemProps)
 
       <div className="p-3">
         <Link
-          href={`/product/${item.product._id}`}
+          href={`/category/sarees `}
         >
           <h3 className="text-sm font-medium text-gray-900 mb-1.5 font-playfair hover:text-gray-700 transition-colors line-clamp-2">
             {item.product.name}

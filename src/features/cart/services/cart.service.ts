@@ -1,7 +1,5 @@
-import apiClient from "@/lib/api-client";
-
-const BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || "https://api-dev.maheksarees.in/api/";
+import { BaseService } from "@/lib/base-service";
+import { API_ENDPOINTS } from "@/lib/api-config";
 
 export interface AddToCartRequest {
   productId: string;
@@ -23,54 +21,56 @@ export interface RemoveFromCartRequest {
   size: string;
 }
 
-export interface CartItem {
-  productId: string;
-  variantId: string;
-  size: string;
-  quantity: number;
+export interface CartItemProduct {
+  _id: string;
+  name: string;
+  slug: string;
+  allImages: string[];
 }
 
-class CartService {
+export interface CartItem {
+  product: CartItemProduct;
+  variantId: string;
+  color: string;
+  size: string;
+  quantity: number;
+  price: number;
+  images?: string[];
+}
+
+export interface CartListResponse {
+  items: CartItem[];
+}
+
+class CartService extends BaseService {
   private readonly CART_STORAGE_KEY = "mahek_cart";
 
   async addToCart(data: AddToCartRequest): Promise<void> {
-    try {
-      await apiClient.post(`${BASE_URL}cart/add`, data);
-    } catch (error) {
-      console.error("Error adding to cart:", error);
-      throw error;
-    }
+    return this.post<void>(API_ENDPOINTS.CART.ADD, data);
   }
 
   async updateCart(data: UpdateCartRequest): Promise<void> {
-    try {
-      await apiClient.post(`${BASE_URL}cart/update`, data);
-    } catch (error) {
-      console.error("Error updating cart:", error);
-      throw error;
-    }
+    return this.put<void>(API_ENDPOINTS.CART.UPDATE, data);
   }
 
   async removeFromCart(data: RemoveFromCartRequest): Promise<void> {
-    try {
-      await apiClient.post(`${BASE_URL}cart/remove`, data);
-    } catch (error) {
-      console.error("Error removing from cart:", error);
-      throw error;
-    }
+    return this.delete<void>(API_ENDPOINTS.CART.REMOVE, data);
   }
 
-  getCartCount(): number {
+  async getCartList(): Promise<CartListResponse> {
+    return this.get<CartListResponse>(API_ENDPOINTS.CART.LIST);
+  }
+
+  async clearCart(): Promise<void> {
+    return this.delete<void>(API_ENDPOINTS.CART.CLEAR);
+  }
+
+  async getCartCount(): Promise<number> {
     try {
-      if (typeof window === "undefined") return 0;
-
-      const cartData = localStorage.getItem(this.CART_STORAGE_KEY);
-      if (!cartData) return 0;
-
-      const cart: CartItem[] = JSON.parse(cartData);
-      return cart.reduce((total, item) => total + item.quantity, 0);
+      const response = await this.getCartList();
+      return response.items.reduce((total, item) => total + item.quantity, 0);
     } catch (error) {
-      console.error("Error calculating cart count:", error);
+      console.error("Error fetching cart count:", error);
       return 0;
     }
   }

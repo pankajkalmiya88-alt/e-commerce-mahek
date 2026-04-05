@@ -15,7 +15,7 @@ export const generateProductSchema = (product: Product) => {
     },
     offers: {
       "@type": "Offer",
-      url: `${SITE_CONFIG.url}/product/${product.slug}`,
+      url: `${SITE_CONFIG.url}/category/${product.category}`,
       priceCurrency: SITE_CONFIG.currency,
       price: product.price.current,
       availability:

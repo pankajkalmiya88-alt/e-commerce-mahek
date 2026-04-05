@@ -23,9 +23,16 @@ export const Header = () => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [placeholderIndex, setPlaceholderIndex] = useState(0);
   const [isAuth, setIsAuth] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const { cartCount, wishlistCount } = useCartWishlist();
 
   useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
+
     setIsAuth(isAuthenticated());
 
     const handleStorageChange = () => {
@@ -42,7 +49,7 @@ export const Header = () => {
       window.removeEventListener("storage", handleStorageChange);
       clearInterval(interval);
     };
-  }, []);
+  }, [mounted]);
 
   useEffect(() => {
     const interval = setInterval(() => {

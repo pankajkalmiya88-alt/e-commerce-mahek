@@ -1,22 +1,42 @@
+export interface WishlistProductVariantSize {
+  size: string;
+  stock: number;
+}
+
+export interface WishlistProductVariant {
+  variantId: string;
+  color: string;
+  sellingPrice: number;
+  mrp: number;
+  sizes: WishlistProductVariantSize[];
+  images: string[];
+  sizeDetails: string;
+}
+
 export interface WishlistProduct {
   _id: string;
   name: string;
   slug: string;
-  price: number;
-  discountPercent: number;
-  oldPrice?: number;
-  images: string[];
   category: string;
+  isActive: boolean;
+  isFeatured: boolean;
+  allImages: string[];
+  allColors: string[];
+  allSizes: string[];
+  variants: WishlistProductVariant[];
   averageRating: number;
   totalReviews: number;
-  stock: number;
-  availability?: "IN_STOCK" | "OUT_OF_STOCK" | "PRE_ORDER";
+  reviews: any[];
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface WishlistItem {
-  _id: string;
+  _id?: string;
   product: WishlistProduct;
-  addedAt: string;
+  variantId: string;
+  size: string;
+  addedAt?: string;
 }
 
 export interface WishlistResponse {
@@ -26,17 +46,27 @@ export interface WishlistResponse {
 
 export interface AddToWishlistRequest {
   productId: string;
+  variantId: string;
+  size: string;
 }
 
 export interface MoveToCartRequest {
   productId: string;
+  variantId: string;
+  size: string;
 }
 
-export interface BulkMoveToCartRequest {
-  productIds: string[];
+export interface BulkMoveToCartItem {
+  productId: string;
+  variantId: string;
+  size: string;
 }
+
+export type BulkMoveToCartRequest = BulkMoveToCartItem[];
 
 export interface AddToCartRequest {
   productId: string;
+  variantId: string;
+  size: string;
   quantity: number;
 }

@@ -20,6 +20,7 @@ const CartWishlistContext = createContext<CartWishlistContextType | undefined>(u
 export function CartWishlistProvider({ children }: { children: ReactNode }) {
   const [cartCount, setCartCount] = useState(0);
   const [wishlistCount, setWishlistCount] = useState(0);
+  const [mounted, setMounted] = useState(false);
 
   const fetchCounts = async () => {
     if (!isAuthenticated()) {
@@ -41,6 +42,12 @@ export function CartWishlistProvider({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
+
     fetchCounts();
 
     const handleStorageChange = () => {
@@ -59,7 +66,7 @@ export function CartWishlistProvider({ children }: { children: ReactNode }) {
       window.removeEventListener("storage", handleStorageChange);
       clearInterval(interval);
     };
-  }, []);
+  }, [mounted]);
 
   const refreshCounts = async () => {
     await fetchCounts();

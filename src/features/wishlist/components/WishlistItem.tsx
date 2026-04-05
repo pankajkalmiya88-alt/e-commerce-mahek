@@ -3,10 +3,10 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import type { WishlistItem } from "../types";
+import type { UIWishlistItem } from "../adapters/wishlist.adapter";
 
 interface WishlistItemProps {
-  item: WishlistItem;
+  item: UIWishlistItem;
   onRemove: (productId: string) => void;
   onAddToCart: (productId: string) => void;
 }
@@ -61,19 +61,17 @@ export function WishlistItem({ item, onRemove, onAddToCart }: WishlistItemProps)
       </button>
 
       <Link
-        href={`/product/${item.product.slug}`}
-        target="_blank"
-        rel="noopener noreferrer"
+        href={`/category/sarees`}
         className="block"
       >
-        <div className="relative aspect-[3/4] w-full">
+        <div className="relative aspect-[4/5] w-full">
           {item.product.discountPercent > 0 && (
             <div className="absolute top-2 left-2 bg-red-600 text-white text-xs font-bold px-2.5 py-1 rounded font-poppins z-10">
               -{item.product.discountPercent}%
             </div>
           )}
           <Image
-            src={item.product.images[0] || "/placeholder.jpg"}
+            src={item.product.images?.[0] || "/placeholder.jpg"}
             alt={item.product.name}
             fill
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
@@ -82,18 +80,16 @@ export function WishlistItem({ item, onRemove, onAddToCart }: WishlistItemProps)
         </div>
       </Link>
 
-      <div className="p-4">
+      <div className="p-3">
         <Link
-          href={`/product/${item.product.slug}`}
-          target="_blank"
-          rel="noopener noreferrer"
+          href={`/category/sarees `}
         >
-          <h3 className="text-sm font-medium text-gray-900 mb-2 font-playfair hover:text-gray-700 transition-colors line-clamp-2 min-h-[2.5rem]">
+          <h3 className="text-sm font-medium text-gray-900 mb-1.5 font-playfair hover:text-gray-700 transition-colors line-clamp-2">
             {item.product.name}
           </h3>
         </Link>
 
-        <div className="flex items-center gap-0.5 mb-2">
+        <div className="flex items-center gap-0.5 mb-1.5">
           {[...Array(5)].map((_, i) => (
             <svg
               key={i}
@@ -112,18 +108,20 @@ export function WishlistItem({ item, onRemove, onAddToCart }: WishlistItemProps)
           </span>
         </div>
 
-        <div className="flex items-center gap-2 mb-3">
+        <div className="flex items-center gap-2 mb-2">
           <span className="text-lg font-bold text-gray-900 font-poppins">
             ₹{item.product.price.toLocaleString()}
           </span>
-          {item.product.oldPrice && (
+          {item.product.oldPrice > item.product.price && (
             <>
               <span className="text-sm text-gray-400 line-through font-poppins">
                 ₹{item.product.oldPrice.toLocaleString()}
               </span>
-              <span className="text-xs text-red-600 font-semibold font-poppins">
-                ({item.product.discountPercent}% OFF)
-              </span>
+              {item.product.discountPercent > 0 && (
+                <span className="text-xs text-red-600 font-semibold font-poppins">
+                  ({item.product.discountPercent}% OFF)
+                </span>
+              )}
             </>
           )}
         </div>
@@ -131,13 +129,13 @@ export function WishlistItem({ item, onRemove, onAddToCart }: WishlistItemProps)
         <button
           onClick={handleAddToCart}
           disabled={isAddingToCart || item.product.availability === "OUT_OF_STOCK"}
-          className="w-full bg-primary text-white px-4 py-2.5 text-sm font-semibold rounded hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-poppins"
+          className="w-full bg-primary text-white px-4 py-2 text-sm font-semibold rounded hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-poppins"
         >
           {isAddingToCart
             ? "Adding..."
             : item.product.availability === "OUT_OF_STOCK"
             ? "Out of Stock"
-            : "Add to Cart"}
+            : "Move to Cart"}
         </button>
       </div>
     </div>

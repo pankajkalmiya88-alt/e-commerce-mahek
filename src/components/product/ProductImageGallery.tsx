@@ -10,6 +10,8 @@ interface ProductImageGalleryProps {
   images: ProductImage[];
   productName: string;
   productId: string;
+  variantId: string;
+  size: string;
   label?: {
     type: ProductLabelType;
     text: string;
@@ -17,7 +19,7 @@ interface ProductImageGalleryProps {
   bestseller?: boolean;
 }
 
-export const ProductImageGallery = ({ images, productName, productId, label, bestseller }: ProductImageGalleryProps) => {
+export const ProductImageGallery = ({ images, productName, productId, variantId, size, label, bestseller }: ProductImageGalleryProps) => {
   const [selectedImage, setSelectedImage] = useState(0);
   const [isZoomed, setIsZoomed] = useState(false);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
@@ -147,7 +149,11 @@ export const ProductImageGallery = ({ images, productName, productId, label, bes
                   setIsWishlisted(false);
                   decrementWishlistCount();
                 } else {
-                  await wishlistService.addToWishlist({ productId });
+                  await wishlistService.addToWishlist({ 
+                    productId, 
+                    variantId, 
+                    size 
+                  });
                   setIsWishlisted(true);
                   incrementWishlistCount();
                 }

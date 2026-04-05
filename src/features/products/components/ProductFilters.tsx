@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ProductsListParams } from "../types";
 
 interface ColorOption {
@@ -12,6 +12,7 @@ interface ProductFiltersProps {
   onFilterChange: (filters: ProductsListParams) => void;
   availableColors?: ColorOption[];
   availableSizes?: string[];
+  initialFilters?: ProductsListParams;
 }
 
 const getColorCode = (colorValue: string): string => {
@@ -69,12 +70,22 @@ export function ProductFilters({
   onFilterChange,
   availableColors = [],
   availableSizes = [],
+  initialFilters,
 }: ProductFiltersProps) {
-  const [filters, setFilters] = useState<ProductsListParams>({
-    limit: 10,
-    page: 1,
-  });
+  const [filters, setFilters] = useState<ProductsListParams>(
+    initialFilters || {
+      limit: 10,
+      page: 1,
+    }
+  );
   const [colorSearchQuery, setColorSearchQuery] = useState("");
+
+  // Update local filters when initialFilters change (from URL)
+  useEffect(() => {
+    if (initialFilters) {
+      setFilters(initialFilters);
+    }
+  }, [initialFilters]);
 
   const handleFilterChange = (key: keyof ProductsListParams, value: any) => {
     const newFilters = { ...filters, [key]: value, page: 1 };
